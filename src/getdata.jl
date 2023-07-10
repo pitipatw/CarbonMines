@@ -1,4 +1,4 @@
-using HTTP, JSON
+using HTTP, JSON, DataFrames
 #GOAL
 #at the first loop, get the total number of pages
 #get that by res["X-Total-Pages"]
@@ -8,81 +8,66 @@ using HTTP, JSON
 #filename = "ECS" * string(i) * ".json"
 
 include("key.jl")
-# Authorization: Bearer "$token"
-# curl -H "Authorization: Bearer TX6wOlpw03TIaEI5TNyEW5tNddSzpN" https://buildingtransparency.org/api/epds
-#get data from buildingtransparency.org/api/epds using the api api_key
-function get_data(cat::String, page::Int64; token::String = token, mode::Int64 = 0)
+
+function get_data(cate::String, page::Int64
+    ;token::String = token, mode::Int64 = 0)
     if mode == 0
         res = HTTP.request( "GET",
-        "https://buildingtransparency.org/api/$cat/?page_number=$page", #materials?page_number=2",
+        "https://buildingtransparency.org/api/$cate/?page_number=$page", #materials?page_number=2",
         ["Authorization" => "Bearer "*"$token"]
         )
     else
         println("Mode not found")
         res = 0.0
-            
     end
     return res
 end
 
-#test run
-res = get_data("", page)
 
-res = 0
-cat = "materials"
+#test run
+res = get_data("materials", 1)
+response_text = String(res.body)
+msg = JSON.parse(response_text)
+df = DataFrame(msg)
+##########
+
+function scrapeit()
+cate = "materials"
 page = 1 #start from page 1
 total_pages = 0
-filepath = joinpath(@__DIR__,"all_files/")
-msg = 0 
+filepath = joinpath(@__DIR__,"rawdata/")
 
-# # at test run 
-# res = get_data(cat, page)
-# response_text = String(res.body)
-# filename = "ECS_page_" * string(0) * ".json"
-# msg = JSON.parse(response_text)
 
+#initialize variables
+page = 1 ; total_pages = 0;
 @time while page != total_pages
-    if page == 1 
-        res = get_data(cat, page)
-        response_text = String(res.body)
-        filename = "ECS_page_" * string(page) * ".json"
+    
+    res = get_data(cate, page)
+    if page == 1 #first run
         total_pages = parse(Int64,(res["X-Total-Pages"]))
-        println(total_pages)
-
-        msg = JSON.parse(response_text)
-        #write a to a json file
-        println(filepath*filename)
-        open(filepath*filename, "w") do f
-            JSON.print(f, msg)
-        end
-        # open(filepath*filename, "w") do f
-        #     write(f, msg)
-        # end
-        page += 1
-    else
-        res = get_data(cat, page)
-        response_text = String(res.body)
-        filename = "ECS_page_" * string(page) * ".json"
-
-        msg = JSON.parse(response_text)
-        #write a to a json file
-        println(filepath*filename)
-        open(filepath*filename, "w") do f
-            JSON.print(f, msg)
-        end
-        # open(filepath*filename, "w") do f
-        #     write(f, msg)
-        # end
-        page += 1
-        res = nothing #clear the memory
+        println("Scraping process started")
+        println("There are :", total_pages, " pages")
     end
-end
 
-res = get_data()
-response_text = String(res.body)
-a = JSON.parse(response_text)
-a
-#write a to a json file
-open("data.json", "w") do io
-    JSON.print(io, a)
+    response_text = String(res.body)
+
+    #get number to 0000 format for filename
+    spg = "0"^(4-length(string(page)))*string(page)
+    filename = "pg" * string(spg) * ".json"
+
+    msg = JSON.parse(response_text)
+    #write a to a json file
+    println(filepath*filename)
+    open(filepath*filename, "w") do f
+        JSON.print(f, msg)
+    end
+    println("Page ", page, " done")
+    page += 1
+    res = nothing #clear the memory
+    # if page == 2 
+    #     println("Test Run Ended")
+    #     break
+    # end
 end
+end
+scrapeit()
