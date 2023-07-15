@@ -23,6 +23,10 @@ end
 
 #should get 138400 x 328
 df = DataFrame(total_data)
+
+end
+
+oepn
 println(size(df))
 
 
