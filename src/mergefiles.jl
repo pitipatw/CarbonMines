@@ -8,6 +8,8 @@ filepath = joinpath(@__DIR__,"rawdata/")
 
 
 global total_data = Vector{Any}()
+#first, get the total number of pages
+
 total_pages = 1384
 pages = 1:total_pages
 for i in pages
@@ -24,9 +26,6 @@ end
 #should get 138400 x 328
 df = DataFrame(total_data)
 
-end
-
-oepn
 println(size(df))
 
 

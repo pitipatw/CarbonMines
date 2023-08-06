@@ -24,7 +24,7 @@ function get_data(cate::String, page::Int64
 end
 
 
-#test run
+#test run to get the total number of pages first
 res = get_data("materials", 1)
 response_text = String(res.body)
 msg = JSON.parse(response_text)

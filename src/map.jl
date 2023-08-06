@@ -1,4 +1,5 @@
-#From ChatGPT
+#From ChatGPT, interesting ha
+#Make sure to check with the country's longitudes and latitudes
 country_maps = Dict(
     "AE" => "United Arab Emirates",
     "AL" => "Albania",
