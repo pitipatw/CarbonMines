@@ -16,12 +16,13 @@ println(size(df1))
 
 #Get column names
 n1 = names(df1)
+n1 = names(df)
 
 #Find columns that have dictionaries
 dicts = Vector{String}()
 for i in eachindex(n1) #loop the names
     name = n1[i] #get the name
-    col = df1[!,name] #get the value of the column
+    col = df[!,name] #get the value of the column
     T = typeof(col) #check type of that column (Vector{Something})
     eT = eltype(col) #check the element type of that column (Something)
     println(name, " ",eT)
@@ -60,7 +61,7 @@ for i in eachindex(n1) #loop the names
 end
 
 #Extract those dicts out.
-df2 = df1[:,dicts]
+df2 = df[:,dicts]
 
 # owned_by location country
 #owne by has to be solved.

@@ -1,5 +1,8 @@
 using HTTP, JSON, DataFrames
 using ProgressMeter
+
+#Last run : 06/08/2023
+
 #GOAL
 #at the first loop, get the total number of pages
 #get that by res["X-Total-Pages"]
@@ -51,12 +54,12 @@ function scrapeit(;all::Bool=false, total_pages::Int64=5)
         println("Scraping 5 pages")
     end
 
-
     #initialize variables
     p = Progress(total_pages)
     update!(p,1)
     jj = Threads.Atomic{Int}(0)
     l = Threads.SpinLock()
+
     Threads.@threads for page = 1:total_pages
 
         res = get_data(cate, page)
@@ -92,6 +95,6 @@ function scrapeit(;all::Bool=false, total_pages::Int64=5)
     println("Scraping process ended")
     println("#"^20)
 end
-@time scrapeit()
 
+@time scrapeit()
 @time scrapeit(all=true)

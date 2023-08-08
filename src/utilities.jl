@@ -33,7 +33,7 @@ for i =1:size(df1)[1]
             catch #there's no space between the value and unit
                 #MPa case
                 pos = findfirst("m",lowercase(val))[1]
-                if  pos != nothing
+                if  pos !== nothing
                     #There is M (probably MPa) in the string
                     vals[i] = parse(Float64,(split(lowercase(val),"m")[1]))
                     if lowercase(val[pos:end]) == "mpa"
@@ -173,7 +173,7 @@ function plotacountry(df,c)
     ax = Axis(f[1,1], title = title)
     # xlims!(ax, xlim[1], xlim[2])
     # ylims!(ax, 0,0.5)
-    scatter!(ax, df[df[!,"country_map"].==title,"fc"], df[df[!,"country_map"].==title, :][!, "gwp"], 
-    markersize = 10, color = :blue)
+    scatter!(ax, df[df[!,"country_map"].==title,"str28d"], df[df[!,"country_map"].==title, :][!, "gwp"], 
+    markersize = 10, color = df[df[!,"country_map"].==title,"lat"])
     return f
 end
