@@ -96,5 +96,5 @@ function scrapeit(;all::Bool=false, total_pages::Int64=5)
     println("#"^20)
 end
 
-@time scrapeit()
-@time scrapeit(all=true)
+# @time scrapeit()
+# @time scrapeit(all=true)
