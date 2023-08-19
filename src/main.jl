@@ -13,161 +13,49 @@ dftidy = deepcopy(df) #mess with this instead!
 
 println("There are ", size(df)[1], " data points in the dataframe")
 
-#define functions for identifying types of each column
-union_types(x::Union) = (x.a, union_types(x.b)...)
-union_types(x::Type) = (x,)
 
 
-# separate columns with nothing only or single type only, out
-colnames = names(df)
-keep_columns = ones(Bool, length(colnames))
-singletype_columns = zeros(Bool,length(colnames))
-
-#Tidy up the dataset.
-#go through each column in df
-#if the value in that column is a vector 
-# create a new column, with the first column name follows by "_" then the sub column name 
-# if the value is null, or false, turn them into either "" or 0.0, or 0, depend on the type of that column
+#tidy up the dataframe
+keep_column1 = check1(df) 
 
 
-for i in eachindex(colnames) #loop each column
-    name = colnames[i] #get the name of that column
 
-    #get the types of the column
-    types = collect(union_types(eltype(df[!,i])))
+# tidy will have 199 columns
+df_tidy1 = df[!,keep_columns1]
+println("There are ", size(df_tidy1)[1], " data points in the tidy dataframe")
 
-    #check if there is more than 2 types in the column
-    if size(types)[1] > 2  #normally , there are only 2 types in a column
-        println(size(types))
-        println("Column $i has more than 2 types")
-    end
-
-    #check column with only nothing (1 type and that type is the Nothing type)
-    if (Nothing in types)  & (size(types)[1] == 1)
-        # println("Column $i is a vector of nothing")
-        keep_columns[i] = false #disgarding that column
-        #THIS PART IS DONE
-    else
-        Ts = [String, Bool, Int64, Float64] #possible types of column
-        Tsval = ["", false, 0, 0.0] #missing values for those types
-        if size(types)[1] == 2  #probably nothing and something
-            for ti in eachindex(Ts) #loop datatypes.
-                t = Ts[ti]
-                valt = Tsval[ti]
-                if t in types
-                    println("Column $i, $name is a vector of $t")
-                    #initiate the whole column in to a vector of a single type, 
-                    #then replace the original column with the vector
-                    vec = Vector{t}(undef, size(df)[1])
-                    for j in eachindex(df[!,i])
-                        if df[j,i] === nothing
-                            vec[j] = valt
-                        else
-                            vec[j] = df[j,i]
-                        end
-                    end
-                    df[!,i] = vec
-                    break # if it's already found that type, does not have to keep looking anymore.
-
-                end
-            end
-    
-        elseif size(types)[1] > 2 #just in case I missed
-            println("Column $i has more than 2 types")
-            println("Please recheck the data")
-
-        end
-    end
-end
-
-df_tidy = df[!,keep_columns]
-println("There are ", size(df_tidy)[1], " data points in the tidy dataframe")
-
-df_nothing = df[!,keep_columns.==0] 
+df_nothing = df[!,keep_columns1.==0] 
 println(describe(df_nothing))
+println(describe(df_tidy1))
 
 
-#work with df_tidy.
+#work with df_tidy1.
 #checking vector/dict
-tidycolnames = names(df_tidy)
-for i in eachindex(tidycolnames)
-    name = tidycolnames[i]
-    println(name)
+keep_columns2 , singletype_columns = check2(df_tidy1)
 
 
-    #check if there is a vector in the column
-    #criterias to remove a column
-    types = collect(union_types(eltype(dftidy[!,i])))
-    
+#11 gone, 188 left.
+df_tidy2 = df_tidy1[!,keep_columns2]
+df_single = df_tidy1[!, singletype_columns .&& keep_columns2]
+df_multi = df_tidy1[!, singletype_columns .== 0 .&& keep_columns2]
+println(describe(df_tidy2)) #188 columns
+println(describe(df_single)) #163 columns
+println(describe(df_multi)) #25 columns
 
-    # if size(types)[1] > 2 
-    #     println(size(types))
-    #     println("Column $i has more than 2 types")
-    # end
+#DONE first pass.
 
-    # if (Nothing in types)  & (size(types)[1] == 1)
-    #     println("*",name)
-    #     # println("Column $i is a vector of nothing")
-    #     keep_columns[i] = false
-    #     #THIS PART IS DONE
-    # else 
-    #     println(name)
-    # end
+###Now, we can freely select values in df_single.
 
 
-    # println("Column $i is ", types)
-    if size(types)[1] == 1 
-        # println("Column $i is ", types)
-        if types[1] == String
-            singletype_columns[i] = true
-        elseif types[1] == Bool
-            singletype_columns[i] = true
-        elseif types[1] == Int64
-            singletype_columns[i] = true
-        elseif types[1] == Float64
-            singletype_columns[i] = true
-            # println("$i is " ,types)
-        elseif isa(types[1] , Dict)
-        else
-    end
-        # println("Column $i is a vector of ", types)
-    end
-
- 
-    if all(dftidy[!,i] .== 0) || all(dftidy[!,i] .== "") || all(dftidy[!,i] .== false)
-        println("All nothing at ", i , " ", name)
-        keep_columns[i] = false
-    end
-
-end
-
-end #of the begin
-
-
-removed_names = colnames[keep_columns.==0]
-keep_names = colnames[keep_columns.==1]
-multi_types = colnames[keep_columns .* (singletype_columns.==0)]
 
 #first pass, remove nothing columns
 
-# 174 columns kept
-dfsingle = dftidy[:,singletype_columns]
-
-#go through each column in df
-#if all of the values is 0 or "" or false, remove that column
+# CSV.write("singletype.csv", df_single) #163 columns
 
 
-
-dftidy[!,keep_columns]
-#save to a csv file
-
-CSV.write("singletype.csv", dfsingle) #174 columns
-
-#There is still problem with any
-
+#Work on Dictionaries and Vector (df_tidy2 or df_multi.)
 #let's focus on "plant_or_group" column
-
-plant_or_group = dftidy[!,"plant_or_group"]
+plant_or_group = df_tidy2[!,"plant_or_group"]
 # k = keys(plant_or_group[1]) #40 keys and 25 keys
 #plant_or_group_40
 #plant_or_group_25
@@ -267,7 +155,7 @@ CSV.write("singletype_loc.csv", dfsingle) #174 columns
 #         println("*",name)
 
 #         # println("Column $i is a vector of nothing")
-#         keep_columns[i] = false
+#         keep_columns1[i] = false
 #         #THIS PART IS DONE
 #     else 
 #         # println(name)

@@ -132,5 +132,5 @@ function check2(df_tidy1)
     
     end
     
-    return keep_column2 , singletype_columns
+    return keep_columns2 , singletype_columns
     end
