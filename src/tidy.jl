@@ -77,6 +77,12 @@ function check1(df::DataFrame)
     return keep_columns1
 end
 
+
+"""
+separte columns that have single type (easy visualization and analysis)
+    from columns that have multiple types (need to be separated)
+    and also columns that have only 0 values.
+"""
 function check2(df_tidy1::DataFrame)
     tidycolnames = names(df_tidy1)
     keep_columns2 = ones(Bool, length(tidycolnames))

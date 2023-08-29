@@ -7,6 +7,7 @@ include("mergefiles.jl") # This will output "dfsingle" and "dftidy" dataframes
 include("utilities.jl")
 
 include("tidy.jl")
+include("utilities\\map2.jl")
 
 
 #should get 138400 x 328
@@ -27,33 +28,95 @@ println("There are ", size(df_tidy1)[1], " data points in the tidy dataframe")
 println(describe(df_tidy1))
 
 # visualizing columns with "nothing" only
-df_nothing = df[!,keep_columns1.==0] 
-println(describe(df_nothing))
+df_nothing1 = df[!,keep_columns1.==0] 
+println(describe(df_nothing1))
 println(describe(df_tidy1))
 
 #work with df_tidy1.
 #checking for columns with vector/dict
 keep_columns2 , singletype_columns = check2(df_tidy1)
 
-
 #11 gone, 188 left.
 df_tidy2 = df_tidy1[!,keep_columns2]
+df_nothing2 = df_tidy1[!,keep_columns2.==0] 
 df_single = df_tidy1[!, singletype_columns .&& keep_columns2]
 df_multi = df_tidy1[!, singletype_columns .== 0 .&& keep_columns2]
 println(describe(df_tidy2)) #188 columns
+println(describe(df_nothing2)) #11 columns
 println(describe(df_single)) #163 columns
 println(describe(df_multi)) #25 columns
+
+CSV.write("singletype.csv", df_single) #163 columns
+# CSV.write("multitype.csv", df_multi) #25 columns
 
 #DONE first pass.
 
 ###Now, we can freely select values in df_single.
 
+# but have to tie them to location.
+
+#get location and add to single type
+# locations are in df_multi
+countries = Vector{String}()
+has_plant_or_group = Vector{Bool}(undef, size(df_multi))
+has_owned_by = Vector{Bool}(undef, size(df_multi))
+c1 = 0 
+c2 = 0
+c3 = 0
+plant_or_group_ok = Vector{Bool}(undef, size(df_multi,1))
+getout = false
+for i in eachindex(df_multi[!,"plant_or_group"])
+    if getout 
+        break
+    end
+    plant_or_group_ok[i] = false
+    dicti = df_multi[i,"plant_or_group"]
+    try
+        if !haskey(dicti, "country")
+            #use "owned_by" instead
+            println("#####")
+            #inside "owned_by"
+            #latitude, longitude
+            #useful info : 
+            # web_domain
+            # name
+            # address
+            # created on ****
+            # updated_on ****
+            # website
+
+            for j in keys(dicti["owned_by"]["location"])
+                println(j , ":",dicti["owned_by"]["location"[j]])
+                getout = true
+    
+            end
+            break
+            
+        else
+            plant_or_group_ok[i] = true
+            # country
+            # carbon_intensity
+            # latitudes
+            # longitude
+        end
+
+        c2  +=1
+    catch
+        c3  +=1
+    end
+
+end
+
+@label here
+ #only 5449 has plant_or_group -> country
+
+#now we tidy up df_single
+println(describe(df_single)) #163 columns
+
+
 
 
 #first pass, remove nothing columns
-
-# CSV.write("singletype.csv", df_single) #163 columns
-
 
 #Work on Dictionaries and Vector (df_tidy2 or df_multi.)
 #let's focus on "plant_or_group" column
@@ -67,7 +130,7 @@ carbon_intensity = Vector{String}()
 created_on = Vector{String}()
 lat = Vector{Float64}()
 long = Vector{Float64}()
-
+missingcol = Vector{Int64}()
 for i in eachindex(plant_or_group)
     if plant_or_group[i] !== nothing
     # println(i)
@@ -99,6 +162,8 @@ for i in eachindex(plant_or_group)
             end
         end
     else
+        println(i , " is missing")
+        push!(missingcol,i)
         push!(address,"Missing")
         push!(country,"Missing")
         push!(carbon_intensity, "0")
@@ -107,7 +172,16 @@ for i in eachindex(plant_or_group)
         push!(long,0.)
     end
 end
-    
+
+country_fullname = Vector{String}(undef, size(country))
+for i in eachindex(country)
+    try
+    country_fullname[i] = country_maps[country[i]]
+    catch 
+        println(country[i])
+end
+end
+
 
 #find nothing in all of the vector and replace them with approprate values
 for i in eachindex(address)
