@@ -2,9 +2,11 @@
 #Run this after all the files are scraped. (getdata.jl)
 # include("getdata.jl")
 
-include("mergefiles.jl") # This will output dfsingle and dftidy
+include("mergefiles.jl") # This will output "dfsingle" and "dftidy" dataframes
 #have to work with dfsingle
 include("utilities.jl")
+
+include("tidy.jl")
 
 
 #should get 138400 x 328
@@ -14,23 +16,23 @@ dftidy = deepcopy(df) #mess with this instead!
 println("There are ", size(df)[1], " data points in the dataframe")
 
 
-
-#tidy up the dataframe
-keep_column1 = check1(df) 
+#tidy up the dataframe by removing columns with only "nothing"
+keep_columns1 = check1(df) 
 
 
 
 # tidy will have 199 columns
 df_tidy1 = df[!,keep_columns1]
 println("There are ", size(df_tidy1)[1], " data points in the tidy dataframe")
+println(describe(df_tidy1))
 
+# visualizing columns with "nothing" only
 df_nothing = df[!,keep_columns1.==0] 
 println(describe(df_nothing))
 println(describe(df_tidy1))
 
-
 #work with df_tidy1.
-#checking vector/dict
+#checking for columns with vector/dict
 keep_columns2 , singletype_columns = check2(df_tidy1)
 
 
