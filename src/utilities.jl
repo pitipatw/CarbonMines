@@ -1,8 +1,6 @@
 using JLD2
 using Dates
 using DataFrames
-# using JSONTables
-
 
 function getstr(df1, name; warn = true)
     println("#"^10)
