@@ -100,8 +100,8 @@ for i in 1:size(df_single, 1)
         # p_loc = findfirst("psi", stringi)
         if unit_loc !== nothing
             #this is MPa, so let's convert it to MPa
-            fc′_values[i] = parse(Float64, first(stringi, unit_loc[1] - 1))
-            fc′_units[i] = "kgCO2e"
+            gwp_values[i] = parse(Float64, first(stringi, unit_loc[1] - 1))
+            gwp_units[i] = "kgCO2e"
         else
             println(i)
             println(stringi)
