@@ -184,12 +184,12 @@ end
 
 
 
-function checkpoint(df)
+function checkpoint(df::DataFrame)
     path = @__DIR__
     time = today()
     time = replace(string(time), "-" => "_")
 
-    originalpath = path*"\\src\\checkpoints\\checkpoint_"*time
+    originalpath = path*"\\checkpoints\\checkpoint_"*time
 
     fullpath = originalpath*"_ver0.jld2"
     counter = 0
@@ -200,8 +200,8 @@ function checkpoint(df)
             println("inside", counter)
             duplicate = false
             fullpath = originalpath*"_ver"*string(counter)*".jld2"
-            println("checkpoint saved at ", fullpath)
             jldsave(fullpath; df)
+            println("checkpoint saved at ", fullpath)
         end
         counter += 1 
         fullpath = originalpath*"_ver"*string(counter)*".jld2"

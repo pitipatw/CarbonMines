@@ -99,7 +99,7 @@ for i in eachindex(plant_or_group)
             end
         end
     else
-        println(i , " is missing")
+        println(i , " is missing location info")
         push!(missingcol,i)
         push!(address,"Missing")
         push!(country,"Missing")
@@ -150,5 +150,7 @@ df_single[!,"created_on"] = created_on;
 df_single[!,"lat"] = lat;
 df_single[!,"long"] = long;
 
-CSV.write("singletype_loc.csv", df_single) ;#174 columns
-println("CSV file created at singletype_loc.csv")
+filename = "df_single.csv"
+CSV.write(filename, df_single) ;#174 columns
+checkpoint(df_single)
+println("CSV file created at $filename")
