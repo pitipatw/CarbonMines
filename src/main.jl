@@ -5,13 +5,13 @@
 # This will output "dfsingle" and "dftidy" dataframes
 include("mergefiles.jl") ;
 
-#tidy up dataframe
+# functions for tidy up dataframe
 include("tidy.jl") ;
 
-#mapping for country ver.2
+#mapping countries and their abbreviations ver.2
 include("utilities\\map2.jl") ;
 
-# Utilities functions, for plots 
+# Utilities functions, for plotting
 include("utilities.jl") ;
 
 #should get 138400 x 328 
@@ -25,12 +25,12 @@ keep_columns1 = check1!(df)
 # tidy will have 199 columns
 df_tidy1 = df[!,keep_columns1];
 println("There are ", size(df_tidy1)[1], " data points in the tidy dataframe")
-println(describe(df_tidy1));
+# println(describe(df_tidy1));
 
 # visualizing columns with "nothing" only
 df_nothing1 = df[!,keep_columns1.==0] ;
-println(describe(df_nothing1));
-println(describe(df_tidy1));
+# println(describe(df_nothing1));
+# println(describe(df_tidy1));
 
 #work with df_tidy1.
 #checking for columns with vector/dict
@@ -39,15 +39,7 @@ keep_columns2 , singletype_columns = check2(df_tidy1);
 #11 gone, 188 left.
 df_tidy2 = df_tidy1[!,keep_columns2];
 df_nothing2 = df_tidy1[!,keep_columns2.==0] ;
-df_single = df_tidy1[!, singletype_columns .&& keep_columns2];
-df_multi = df_tidy1[!, singletype_columns .== 0 .&& keep_columns2];
-println(describe(df_tidy2)) #188 columns
-println(describe(df_nothing2)) #11 columns
-println(describe(df_single)) #163 columns
-println(describe(df_multi)) #25 columns
 
-CSV.write("singletype.csv", df_single); #163 columns
-println("DONE first pass.")
 # CSV.write("multitype.csv", df_multi) #25 columns
 
 ###Now, we can freely select values in df_single.
@@ -56,8 +48,61 @@ println("DONE first pass.")
 
 #get location and add to single type
 
+#get category column
+category = df_tidy2[!, "category"]
+othernames = []
+for i in eachindex(category)
+    n = lowercase(category[i]["name"])
+    if !(n in othernames)
+        push!(othernames, n)
+    end
+    if occursin("ready",n)
+    else
+        println(n)
+    end
+
+end
+
+look_for = ["concrete", "readymix", "cement "]
+keep_entry1 = Vector{Bool}(undef, size(df_single,1))
+for i in eachindex(keep_entry1)
+    n = lowercase(category[i]["name"]*" ")
+    for j in look_for
+        if occursin(j,n)
+            keep_entry1[i] = true
+             break
+        else
+            keep_entry1[i] = false
+        end
+    end
+end
+
+namess = []
+for i in eachindex(keep_entry1)
+    if keep_entry1[i]
+        # println(category[i]["name"])
+        push!(namess, category[i]["name"])
+    
+    else
+    end
+end
+
+println("selected names")
+for i in unique(namess)
+    println(i)
+end
+
+
+df_tidy3 = df_tidy2[keep_entry1,:]
+df_single = df_tidy1[keep_entry1, singletype_columns .&& keep_columns2];
+df_multi = df_tidy1[keep_entry1, singletype_columns .== 0 .&& keep_columns2];
+
+df_tidy3 = df_tidy2[keep_entry1,:]
+
+
+
 #let's focus on "plant_or_group" column
-plant_or_group = df_tidy2[!,"plant_or_group"];
+plant_or_group = df_tidy3[!,"plant_or_group"];
 # k = keys(plant_or_group[1]) #40 keys and 25 keys
 #plant_or_group_40
 #plant_or_group_25
@@ -99,7 +144,7 @@ for i in eachindex(plant_or_group)
             end
         end
     else
-        println(i , " is missing location info")
+        println("Entry ", i , " is missing location info")
         push!(missingcol,i)
         push!(address,"Missing")
         push!(country,"Missing")
@@ -145,10 +190,13 @@ end
 
 df_single[!,"address"] = address;
 df_single[!,"country"] = country;
+
 df_single[!,"carbon_intensity"] = carbon_intensity;
 df_single[!,"created_on"] = created_on;
 df_single[!,"lat"] = lat;
 df_single[!,"long"] = long;
+
+
 
 filename = "df_single.csv"
 CSV.write(filename, df_single) ;#174 columns

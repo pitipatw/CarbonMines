@@ -3,12 +3,16 @@ working with df_single dataframe
 """
 
 using PlotlyJS
+using Makie, GLMakie
 using DataFrames, CSV
+
+include("continent.jl")
 #load the file into a dataframe
-df_single = CSV.read("df_single.csv", DataFrame)
+df_single = DataFrame(CSV.File("df_single.csv"))
 #check if we have all of the columns we need
 colnames = sort(names(df_single))
 
+#requires columns to be presented
 reqcols = ["concrete_compressive_strength_28d",
     "concrete_compressive_strength_other_d",
     "gwp_per_category_declared_unit",
@@ -16,6 +20,7 @@ reqcols = ["concrete_compressive_strength_28d",
     "declared_unit",
 ];
 
+#check if those columns actually exist
 for i in reqcols
     if i in colnames
     else
@@ -29,11 +34,16 @@ for i in 1:size(df_single, 1)
     # println(df_single[i, "concrete_compressive_strength_28d"])
     # println(i)
     if ismissing(df_single[i, "concrete_compressive_strength_28d"])
-        fc′_values[i] = 0.0
-        fc′_units[i] = missing
-    else
-        global stringi = lowercase(df_single[i, "concrete_compressive_strength_28d"])
+        # println(i)
+        # println(fc′_values[i])
+        # println(fc′_units[i])
 
+        fc′_values[i] = 0.0
+        fc′_units[i] = "-"
+
+    else
+
+        global stringi = lowercase(df_single[i, "concrete_compressive_strength_28d"])
         #this might be due to no space input (e.g. 75MPa instead of 75 MPa)
         #at this stage, only error on MPa, so let's find M in MPa
         m_loc = findfirst("mpa", stringi)
@@ -73,14 +83,14 @@ for i in 1:size(df_single, 1)
         fc′_values_MPa[i] = fc′_values[i] * psi_to_mpa
     elseif fc′_units[i] == "MPa"
         fc′_values_MPa[i] = fc′_values[i]
-    elseif ismissing(fc′_units[i])
+    elseif fc′_units[i] == "-"
         fc′_values_MPa[i] = 0.0
     else
         println("error")
     end
 end
 
-df_single[!,"fc_prime_MPa"] = fc′_values_MPa
+df_single[!, "fc_prime_MPa"] = fc′_values_MPa
 
 #do the same thing with gwp_per_kg
 gwp_values = Vector{Float64}(undef, size(df_single, 1))
@@ -109,10 +119,68 @@ for i in 1:size(df_single, 1)
         # in case psi is the problem
     end
 end
-df_single[!, "gwp_per_fcprime_kg"] = df_single[!, "gwp_per_kg"] ./ df_single[!, "fc_prime_MPa"]
+
+df_single[!, "gwp_values"] = gwp_values
+df_single[!, "gwp_units"] = gwp_units
+df_single[!, "gwp_per_fcprime_kg"] = df_single[!, "gwp_values"] ./ df_single[!, "fc_prime_MPa"]
 
 
 #convert every fc into MPa
-df_single[!, ""]
+for i = 1:size(df_single, 1)
+    val = df_single[i, "gwp_per_fcprime_kg"]
+    if !(typeof(val) <: Number)
+        df_single[i, "gwp_per_fcprime_kg"] = 0.0
+    end
+end
 
-#remove fcprime that's lower than 28 MPa
+#remove fcprime that's lower than 28 MPa let's do this when plotting
+
+continent = Vector{String}(undef, size(df_single, 1))
+for i = 1:size(df_single, 1)
+    c = df_single[i, "country"]
+    if c in europe #european_country_abbreviations
+        continent[i] = "Europe"
+    elseif c in north_america
+        continent[i] = "North America"
+    elseif c in asia
+        continent[i] = "Asia"
+    elseif c in australia
+        continent[i] = "Australia"
+    elseif c in middle_east
+        continent[i] = "Middle East"
+    elseif c in south_america
+        continent[i] = "South America"
+    elseif c == "Missing"
+        continent[i] = "Missing"
+    else
+        println(df_single[i, "country"])
+        println(df_single[i, "address"])
+        println(df_single[i, "name"])
+    end
+end
+
+df_single[!, "continent"] = continent
+
+
+CSV.write("df_ready.csv", df_single) ;#174 columns
+
+
+
+
+# for i = 1:size(df_single, 1)
+#     n = lowercase(df_single[i, "name"])
+#     if occursin("steel", n)
+#         # println(n)
+#     elseif occursin("sheet", n)
+#         # println(n)
+#     elseif occursin("concrete", n)
+#         # println(n)
+#     elseif occursin("mix", n)
+#         # elseif occursin("metal", n)
+#         # elseif occursin("utp", n)
+#         # elseif occursin("pvc", n)
+#         # elseif occursin("genspeed", n)
+#     else
+#         println(n)
+#     end
+# end
