@@ -5,12 +5,41 @@ using GLM
 using LaTeXStrings
 #plot by USA and Europe
 set_theme!(kjl_light)
+include("utilities\\checkpoints.jl")
+
+df_ready = DataFrame(CSV.File("csv_files\\df_ready.csv"))
 
 
-df_single = DataFrame(CSV.File("df_ready.csv"))
-USA = df_single[df_single[!, "country"] .== "US", :]
-Europe = df_single[df_single[!,"continent"] .== "Europe",:]
+plants = df_ready[!, "carbon_intensity"]
 
+
+units = []
+what = []
+vals = Vector{Float64}(undef, size(plants)[1])
+for i in 1:1000 #eachindex(collect(plants))
+    tmp = plants[i]
+
+    blank_pos = findfirst(" ", tmp)
+    if blank_pos === nothing
+        # println(tmp)
+        # if tmp ∉ what
+        #     push!(what, tmp)
+        # end
+        vals[i] = 0.0
+    else
+        unit = last(tmp,length(tmp) - blank_pos[1])
+        if unit == "lbCO2e/MWh"
+            vals[i] = 0.454*parse(Float64, first(tmp, blank_pos[1]-1))
+        else
+            vals[i] = parse(Float64, first(tmp, blank_pos[1]-1))
+        end
+        
+    end
+end
+
+df_ready[!,"intensity"] = vals
+USA = df_ready[df_ready[!, "country"] .== "US", :]
+Europe = df_ready[df_ready[!,"continent"] .== "Europe",:]
 
 #remove gwp that's more than 1
 deleteat!(USA, USA[!, "gwp_values"].>1)
@@ -23,6 +52,10 @@ deleteat!(Europe, Europe[!, "gwp_values"].>1)
 deleteat!(Europe, Europe[!, "fc_prime_MPa"] .< 28 )
 deleteat!(Europe, Europe[!, "fc_prime_MPa"] .> 55 )
 
+USA[!, "gwp_per_fc′"] = USA[!,"gwp_values"]./USA[!,"fc_prime_MPa"]
+Europe[!, "gwp_per_fc′"] = Europe[!,"gwp_values"]./Europe[!,"fc_prime_MPa"]
+
+
 USAmodel = DataFrame(x = USA[!,"fc_prime_MPa"], y=  USA[!, "gwp_values"])
 Europemodel = DataFrame( x = Europe[!, "fc_prime_MPa"], y = Europe[!, "gwp_values"])
 
@@ -34,12 +67,12 @@ function2 = x -> coef(model2)[2]*x + coef(model2)[1]
 
 
 
-f1 = Figure( resolution = (1280,720))
-ax1 = f1[1,1] = Axis(f1,
+f1 = Figure( resolution = (1280,1000))
+ax1 =Axis3(f1[1,1],
     # title
     title = 
     "GWP vs fc' [USA]",
-    titlegap = 36, titlesize = 24,
+    # titlegap = 36, titlesize = 24,
     # x-axis
     # xgridvisible = false,
     xgridcolor = :lightgray, xgridwidth = 2,
@@ -52,80 +85,42 @@ ax1 = f1[1,1] = Axis(f1,
     ylabelsize = 24, #ytickformat = "{:d}",
     yticklabelsize = 24, yticks = LinearTicks(7),
 
-    limits = (25, 60,0,0.7)
+    # ygridcolor = :lightgray, ygridwidth = 2,
+    zlabel = "Intensity [kgCO2e/KWh]",
+    zlabelsize = 24, #ytickformat = "{:d}",
+    zticklabelsize = 24, #yticks = LinearTicks(7),
+
+    # limits = (25, 60,0,0.7)
 )
 
-scatter!(ax1, USA[!, "fc_prime_MPa"], USA[!, "gwp_values"], color = :green, markersize = 10)
-lines!(ax1 , 25:1:60, function1.(25:1:60))
-text!( 50,0.5,
-  text = latexstring(
-    "y = $(round(coef(model1)[2], digits = 4))x + $(round(coef(model1)[1], digits = 2))"
-  ),
-  fontsize = 20
-)
+scatter!(ax1, USA[!, "fc_prime_MPa"], USA[!, "gwp_values"], USA[!, "intensity"],color = USA[!, "intensity"], markersize = 10)
+savepng("plot-with-intensity", f1)
 
-
-f2 = Figure( resolution = (1280,720))
-ax2 = f2[1,1] = Axis(f2,
+f2 = Figure( resolution = (1280,1000))
+ax2 =Axis3(f2[1,1],
     # title
     title = 
     "GWP vs fc' [Europe]",
-    titlegap = 36, titlesize = 28,
+    # titlegap = 36, titlesize = 24,
     # x-axis
-    #xgridcolor = :darkgray, #xgridwidth = 2,
-    xlabel = "fc' [MPa]" , xlabelsize = 24,
-    xticklabelsize = 24, xticks = LinearTicks(10),
+    # xgridvisible = false,
+    xgridcolor = :lightgray, xgridwidth = 2,
+    xlabel = "fc' [MPa]" , xlabelsize = 28,
+    xticklabelsize = 24, xticks = LinearTicks(8),
     # y-axis
-   # ygridcolor = :darkgray, #ygridwidth = 2,
+    # ygridvisible = false,
+    ygridcolor = :lightgray, ygridwidth = 2,
     ylabel = "GWP [kgCO2e/kg]",
     ylabelsize = 24, #ytickformat = "{:d}",
     yticklabelsize = 24, yticks = LinearTicks(7),
 
-    limits = (25,61,0,0.7)
-)
-scatter!(ax2, Europe[!, "fc_prime_MPa"], Europe[!, "gwp_values"], color = :blue)
+    # ygridcolor = :lightgray, ygridwidth = 2,
+    zlabel = "Intensity [kgCO2e/KWh]",
+    zlabelsize = 24, #ytickformat = "{:d}",
+    zticklabelsize = 24, #yticks = LinearTicks(7),
 
-lines!(ax2 , 25:1:60, function2.(25:1:60))
-text!( 50,0.5,
-  text = latexstring(
-    "y = $(round(coef(model2)[2], digits = 4))x + $(round(coef(model2)[1], digits = 2))"
-  ),
-  fontsize = 20
+    # limits = (25, 60,0,0.7)
 )
 
-f2
-f1
-
-save("CISBAT1.png" , f1)
-save("CISBAT2.png" , f2)
-
-
-f21 = Figure( resolution = (1280,720))
-ax21 = f21[1,1] = Axis(f21,
-    # title
-    title = 
-    "GWP vs fc' [Europe]",
-    titlegap = 36, titlesize = 28,
-    # x-axis
-    #xgridcolor = :darkgray, #xgridwidth = 2,
-    xlabel = "fc' [MPa]" , xlabelsize = 24,
-    xticklabelsize = 24, xticks = LinearTicks(10),
-    # y-axis
-   # ygridcolor = :darkgray, #ygridwidth = 2,
-    ylabel = "GWP [kgCO2e/kg]",
-    ylabelsize = 24, #ytickformat = "{:d}",
-    yticklabelsize = 24, yticks = LinearTicks(7),
-
-    limits = (25,61,0,0.3)
-)
-scatter!(ax21, Europe[!, "fc_prime_MPa"], Europe[!, "gwp_values"], color = :blue)
-
-lines!(ax21 , 25:1:60, function2.(25:1:60))
-text!( 50,0.2,
-  text = latexstring(
-    "y = $(round(coef(model2)[2], digits = 4))x + $(round(coef(model2)[1], digits = 2))"
-  ),
-  fontsize = 20
-)
-
-save("CISBAT2-2.png", f21)
+scatter!(ax2, Europe[!, "fc_prime_MPa"], Europe[!, "gwp_values"], Europe[!, "intensity"],color = Europe[!, "intensity"], markersize = 10)
+savepng("plot-with-intensity_EU", f2)

@@ -15,10 +15,11 @@ union_types(x::Union) = (x.a, union_types(x.b)...)
 union_types(x::Type) = (x,)
 """
 This function goes through each column in the dataframe (df)
-    and replaces missing/nothing values with appropriate datatype.
+    and replaces missing/nothing values with their appropriate datatypes.
 """
 function check1!(df::DataFrame)
     # separate columns with nothing only or single type only, out
+    
     colnames = names(df)
     keep_columns1 = ones(Bool, length(colnames))
 

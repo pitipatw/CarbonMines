@@ -41,3 +41,11 @@ end
 # checkpoint(df)
 
 # df_load = load("E://dev//CarbonMines//src//checkpoints//checkpoint_2023_08_19_ver2.jld2")
+
+
+function savepng( name::String, f1::Figure;
+    path::String = "outputs\\")
+    println("Current Directory is "*@__DIR__)
+    save(path*name*".png" , f1)
+    return f1
+end

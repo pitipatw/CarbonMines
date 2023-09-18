@@ -1,7 +1,8 @@
 # For scrap data from the website.
+# scripts in the folder "scraping"
 ## include("getdata.jl")
 
-#Run this after all the files are scraped. (getdata.jl)
+#Run this after all the files are scraped using getdata.jl
 # This will output "dfsingle" and "dftidy" dataframes
 include("mergefiles.jl") ;
 
@@ -9,10 +10,10 @@ include("mergefiles.jl") ;
 include("tidy.jl") ;
 
 #mapping countries and their abbreviations ver.2
-include("utilities\\map2.jl") ;
+include("utilities\\mapping_countries.jl") ;
 
 # Utilities functions, for plotting
-include("utilities.jl") ;
+include("utilities\\utilities.jl") ;
 
 #should get 138400 x 328 
 df = mergefiles(); # a placeholder (don't mess with this!)
@@ -36,17 +37,13 @@ df_nothing1 = df[!,keep_columns1.==0] ;
 #checking for columns with vector/dict
 keep_columns2 , singletype_columns = check2(df_tidy1);
 
-#11 gone, 188 left.
+#11 gone, 188 columns left.
 df_tidy2 = df_tidy1[!,keep_columns2];
 df_nothing2 = df_tidy1[!,keep_columns2.==0] ;
 
 # CSV.write("multitype.csv", df_multi) #25 columns
 
-###Now, we can freely select values in df_single.
-
-# but have to tie them to locations -> countries
-
-#get location and add to single type
+###Now, we can freely select values in df_single.###
 
 #get category column
 category = df_tidy2[!, "category"]
@@ -63,6 +60,7 @@ for i in eachindex(category)
 
 end
 
+#get only concrete related datapoints
 look_for = ["concrete", "readymix", "cement "]
 keep_entry1 = Vector{Bool}(undef, size(df_single,1))
 for i in eachindex(keep_entry1)
@@ -76,6 +74,9 @@ for i in eachindex(keep_entry1)
         end
     end
 end
+
+n_keep_entry1 = sum(keep_entry1)
+println("There are $n_keep_entry1 columns which relate to concrete")
 
 namess = []
 for i in eachindex(keep_entry1)
