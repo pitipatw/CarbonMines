@@ -2,17 +2,19 @@ using DataFrames, JSONTables, CSV
 using JSON
 using ProgressMeter
 
+
+
+println("Note to try vcat(DataFrame.(data)...)")
+println("also, should try DataFrameMeta.jl !!")
+
 """
     joindata()
     Go through rawdata folder and concat all the files into a dataframe
     #tidy up files in the rawdata folder and merge into a dataframe
 """
-
-println("Note to try vcat(DataFrame.(data)...)")
-println("also, should try DataFrameMeta.jl !!")
-function mergefiles(;dummy = false)
+function mergefiles(;dummy = false, path = "rawdata/")
     #get path to rawdata folder
-    filepath = joinpath(@__DIR__,"rawdata/")
+    filepath = joinpath(@__DIR__,path)
     
     if dummy
         total_pages = 10
