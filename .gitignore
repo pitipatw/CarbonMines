@@ -29,3 +29,5 @@ ECall.csv
 *.csv
 
 src/checkpoints/
+
+*.json

@@ -7,21 +7,29 @@ using ProgressMeter
     Go through rawdata folder and concat all the files into a dataframe
     #tidy up files in the rawdata folder and merge into a dataframe
 """
-function mergefiles()
+
+println("Note to try vcat(DataFrame.(data)...)")
+println("also, should try DataFrameMeta.jl !!")
+function mergefiles(;dummy = false)
     #get path to rawdata folder
-    filepath = joinpath(@__DIR__,"rawdata\\")
+    filepath = joinpath(@__DIR__,"rawdata/")
     
+    if dummy
+        total_pages = 10
+    else 
     #get the total number of pages by number of files in the folder.
     total_pages = size(readdir(filepath))[1]
+    end
+
     total_data = Vector{Any}(undef, total_pages)
+    pages = 1:total_pages
+
 
     #initiate progress bar for tracking progress
     p = Progress(total_pages)
-    update!(p,1)
+    ProgressMeter.update!(p,1)
     jj = Threads.Atomic{Int}(0)
     l = Threads.SpinLock()
-
-    pages = 1:total_pages
     #speed will depend on the number of threads
     println("Available threads: ",Threads.nthreads())
     @time Threads.@threads for i in pages
@@ -41,13 +49,17 @@ function mergefiles()
         # update the progress bar
         Threads.atomic_add!(jj, 1)
         Threads.lock(l)
-        update!(p, jj[])
+        ProgressMeter.update!(p, jj[])
         Threads.unlock(l)  
     end
     #concat all the data and turn into a dataframe
     total_data = vcat(total_data...)
     println("Done concating files")
+    try
     df = DataFrame(total_data);
+    catch 
+        return total_data
+    end
     println("DONE")
     return df
 end

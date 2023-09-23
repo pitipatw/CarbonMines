@@ -1,22 +1,32 @@
 # For scrap data from the website.
 # scripts in the folder "scraping"
-## include("getdata.jl")
+include("getdata.jl")
+scrapeit(all=true, path =fullpath )
 
 #Run this after all the files are scraped using getdata.jl
 # This will output "dfsingle" and "dftidy" dataframes
 include("mergefiles.jl") ;
 
+
 # functions for tidy up dataframe
 include("tidy.jl") ;
 
 #mapping countries and their abbreviations ver.2
-include("utilities\\mapping_countries.jl") ;
+include("utilities/mapping_countries.jl") ;
 
 # Utilities functions, for plotting
-include("utilities\\utilities.jl") ;
+include("utilities/utilities.jl") ;
 
 #should get 138400 x 328 
 df = mergefiles(); # a placeholder (don't mess with this!)
+removekey = ["sae_standards", "en_standards", "astm_standards"]
+df = mergefiles(dummy = true)
+for i in eachindex(df)
+    for j in removekey
+        delete!(df[i], j)
+    end
+end
+df = DataFrame(df)
 # dftidy = deepcopy(df) #mess with this instead!
 println("There are ", size(df)[1], " datapoints in the dataframe")
 
@@ -62,7 +72,7 @@ end
 
 #get only concrete related datapoints
 look_for = ["concrete", "readymix", "cement "]
-keep_entry1 = Vector{Bool}(undef, size(df_single,1))
+keep_entry1 = Vector{Bool}(undef, size(df,1))
 for i in eachindex(keep_entry1)
     n = lowercase(category[i]["name"]*" ")
     for j in look_for
