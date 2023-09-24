@@ -6,7 +6,7 @@ using PlotlyJS
 using Makie, GLMakie
 using DataFrames, CSV
 
-include("continent.jl")
+include("utilities/mapping_continents.jl")
 #load the file into a dataframe
 df_single = DataFrame(CSV.File("df_single.csv"))
 #check if we have all of the columns we need
@@ -29,6 +29,7 @@ for i in reqcols
 end
 
 fc′_values = Vector{Float64}(undef, size(df_single, 1))
+
 fc′_units = Vector{String}(undef, size(df_single, 1))
 for i in 1:size(df_single, 1)
     # println(df_single[i, "concrete_compressive_strength_28d"])
@@ -91,6 +92,7 @@ for i in 1:size(df_single, 1)
 end
 
 df_single[!, "fc_prime_MPa"] = fc′_values_MPa
+df_single[!, "fc_prime_units"] = fc′_units
 
 #do the same thing with gwp_per_kg
 gwp_values = Vector{Float64}(undef, size(df_single, 1))
@@ -162,7 +164,7 @@ end
 df_single[!, "continent"] = continent
 
 
-CSV.write("df_ready.csv", df_single) ;#174 columns
+CSV.write("df_ready2.csv", df_single) ;#174 columns
 
 
 

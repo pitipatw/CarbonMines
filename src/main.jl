@@ -5,6 +5,7 @@ include("loadall.jl");
 # scrapeit(all=true, path =fullpath)
 
 #test merge files
+fullpath = "/Users/pitipatwongsittikan/dev/CarbonMines/src/rawdata_150802/"
 df = mergefiles(dummy = true, path = fullpath)  #If this line fails due to keys error, remove those keys (if those aren't the important ones)
 
 if typeof(df) == DataFrame
@@ -214,7 +215,23 @@ for i in eachindex(country)
 end
 end
 
+IDs = Vector{String}(undef, size(df_tidy3)[1])
+for i in eachindex(IDs)
+    # println(i)
+    IDs[i] = df_tidy3[i,"id"]
+end
 
+
+owned_by = Vector{String}(undef, size(df_tidy3)[1])
+for i in eachindex(owned_by)
+    # println(i)
+    owned_by[i] = df_tidy3[i,"plant_or_group"]["owned_by"]["name"]
+end
+
+
+
+df_single[!,"ID"] = IDs;
+df_single[!,"owned_by"] = owned_by;
 df_single[!,"address"] = address;
 df_single[!,"country"] = country;
 
