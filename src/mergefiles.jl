@@ -17,10 +17,11 @@ function mergefiles(;dummy = false, path = "rawdata/")
     filepath = joinpath(@__DIR__,path)
     
     if dummy
+        println("Dummy Merge with 10 pages")
         total_pages = 10
     else 
-    #get the total number of pages by number of files in the folder.
-    total_pages = size(readdir(filepath))[1]
+        #get the total number of pages by number of files in the folder.
+        total_pages = size(readdir(filepath))[1]
     end
 
     total_data = Vector{Any}(undef, total_pages)
@@ -58,7 +59,7 @@ function mergefiles(;dummy = false, path = "rawdata/")
     total_data = vcat(total_data...)
     println("Done concating files")
     try
-    df = DataFrame(total_data);
+        df = DataFrame(total_data);
     catch 
         return total_data
     end

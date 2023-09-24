@@ -1,32 +1,48 @@
-# For scrap data from the website.
-# scripts in the folder "scraping"
-include("getdata.jl")
-scrapeit(all=true, path =fullpath )
 
-#Run this after all the files are scraped using getdata.jl
-# This will output "dfsingle" and "dftidy" dataframes
-include("mergefiles.jl") ;
+#Load all required functions.
+include("loadall.jl");
 
+# scrapeit(all=true, path =fullpath)
 
-# functions for tidy up dataframe
-include("tidy.jl") ;
+#test merge files
+df = mergefiles(dummy = true, path = fullpath)  #If this line fails due to keys error, remove those keys (if those aren't the important ones)
 
-#mapping countries and their abbreviations ver.2
-include("utilities/mapping_countries.jl") ;
+if typeof(df) == DataFrame
+    println("Merge successful")
+else
+    println("Merge failed")
 
-# Utilities functions, for plotting
-include("utilities/utilities.jl") ;
-
-#should get 138400 x 328 
-df = mergefiles(); # a placeholder (don't mess with this!)
-removekey = ["sae_standards", "en_standards", "astm_standards"]
-df = mergefiles(dummy = true)
+removekey = ["sae_standards",
+             "en_standards",
+             "astm_standards"
+            ]
 for i in eachindex(df)
     for j in removekey
         delete!(df[i], j)
     end
 end
 df = DataFrame(df)
+end
+
+
+#should get 138400 x 328 (or N by 328) 
+df = mergefiles(path = fullpath)
+if typeof(df) == DataFrame
+    println("Merge successful")
+else
+    println("Merge failed")
+
+removekey = ["sae_standards",
+             "en_standards",
+             "astm_standards"
+            ]
+for i in eachindex(df)
+    for j in removekey
+        delete!(df[i], j)
+    end
+end
+df = DataFrame(df)
+end
 # dftidy = deepcopy(df) #mess with this instead!
 println("There are ", size(df)[1], " datapoints in the dataframe")
 

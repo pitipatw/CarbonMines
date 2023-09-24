@@ -189,7 +189,7 @@ function checkpoint(df::DataFrame)
     time = today()
     time = replace(string(time), "-" => "_")
 
-    originalpath = path*"\\checkpoints\\checkpoint_"*time
+    originalpath = path*"/checkpoints/checkpoint_"*time
 
     fullpath = originalpath*"_ver0.jld2"
     counter = 0
