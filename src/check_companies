@@ -11,9 +11,9 @@ using CSV, DataFrames
 df_single = DataFrame(CSV.File("df_ready2.csv"))
 Makie.inline!(false)
 companies = sort(unique(df_single[!,"owned_by"]))
-f1 = Figure(resolution = (1920,1600))
 
-menu = Menu(f1, options = vcat("None", companies), default = "None")
+f1 = Figure(resolution = (1920,1600))
+menu = Menu(f1, options = companies, default = companies[1])
 
 # funcs = [sqrt, x->x^2, sin, cos]
 
@@ -30,7 +30,7 @@ f1[1, 1] = vgrid!(
 ax1 = f1[1,2] = Axis(f1,
     # title
     title = 
-    "GWP vs fc' [USA]",
+    "GWP vs fc'",
     titlegap = 36, titlesize = 24,
     # x-axis
     # xgridvisible = false,
@@ -44,33 +44,29 @@ ax1 = f1[1,2] = Axis(f1,
     ylabelsize = 24, #ytickformat = "{:d}",
     yticklabelsize = 24, yticks = LinearTicks(7),
 
-    # limits = (20, 65,0,0.7)
+    limits = (20, 65,0,0.7)
 )
 #plot everything as grey by default
-scatter!(ax1, df_single[!,"fc_prime_MPa"], df_single[!,"gwp_values"], color = :grey, markersize = 10)
 
-company = Observable(0)
-function plot_company(company::String)::Function
-    df_dummy = df_single[df_single[!,"owned_by"] .== company, "gwp_per_kg"]
-    xs = df_dummy[!,"fc_prime_MPa"]
-    ys = df_dummy[!,"gwp_values"]
-    scat = scatter!(ax1, xs,ys, markersize = 10px, color = :red)
-end
+xs = Observable(df_single[!,"fc_prime_MPa"])
+ys = Observable(df_single[!,"gwp_values"])
 
-r = lift(plot_company)
-# cb = Colorbar(fig[1, 3], scat)
+scatter!(ax1, df_single[!,"fc_prime_MPa"], df_single[!,"gwp_values"] , color = :grey, markersize = 10)
+scatter!(ax1, xs,ys , color = :green, markersize = 20)
+
+# # r = lift(plot_company)
+# # cb = Colorbar(fig[1, 3], scat)
 on(menu.selection) do s
-    println(s)
-    println(typeof(s))
-    company = s
-    df_dummy = df_single[df_single[!,"owned_by"] .== company, "gwp_per_kg"]
-    xs = df_dummy[!,"fc_prime_MPa"]
-    ys = df_dummy[!,"gwp_values"]
-    scat = scatter!(ax1, xs,ys, markersize = 20, color = :red)
+    # println(typeof(s))
+    bits = df_single[!,"owned_by"] .== s
+    # println("bits", typeof(bits))
+    # println("xx",typeof(df_single[bits, "gwp_values"]))
+    xs.val = df_single[bits, "fc_prime_MPa"]
+    ys[] = df_single[bits, "gwp_values"]
 end
 
-# end
-# notify(menu.selection)
+# # end
+notify(menu.selection)
 menu.is_open = true
 f1
 
