@@ -25,3 +25,11 @@ srcECS_page_all.csv
 
 ECall.csv
 >>>>>>> main
+
+*.csv
+
+src/checkpoints/
+
+*.json
+
+*.jld2

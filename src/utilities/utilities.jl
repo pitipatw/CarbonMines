@@ -1,3 +1,7 @@
+using JLD2
+using Dates
+using DataFrames
+
 function getstr(df1, name; warn = true)
     println("#"^10)
     println("Getting STRENGTH values for "*name)
@@ -33,7 +37,7 @@ for i =1:size(df1)[1]
             catch #there's no space between the value and unit
                 #MPa case
                 pos = findfirst("m",lowercase(val))[1]
-                if  pos != nothing
+                if  pos !== nothing
                     #There is M (probably MPa) in the string
                     vals[i] = parse(Float64,(split(lowercase(val),"m")[1]))
                     if lowercase(val[pos:end]) == "mpa"
@@ -173,7 +177,48 @@ function plotacountry(df,c)
     ax = Axis(f[1,1], title = title)
     # xlims!(ax, xlim[1], xlim[2])
     # ylims!(ax, 0,0.5)
-    scatter!(ax, df[df[!,"country_map"].==title,"fc"], df[df[!,"country_map"].==title, :][!, "gwp"], 
-    markersize = 10, color = :blue)
+    scatter!(ax, df[df[!,"country_map"].==title,"str28d"], df[df[!,"country_map"].==title, :][!, "gwp"], 
+    markersize = 10, color = df[df[!,"country_map"].==title,"lat"])
     return f
 end
+
+
+
+function checkpoint(df::DataFrame)
+    path = @__DIR__
+    time = today()
+    time = replace(string(time), "-" => "_")
+
+    originalpath = path*"/checkpoints/checkpoint_"*time
+
+    fullpath = originalpath*"_ver0.jld2"
+    counter = 0
+    duplicate = true
+    while duplicate
+        println(counter)
+        if !isfile(fullpath)
+            println("inside", counter)
+            duplicate = false
+            fullpath = originalpath*"_ver"*string(counter)*".jld2"
+            jldsave(fullpath; df)
+            println("checkpoint saved at ", fullpath)
+        end
+        counter += 1 
+        fullpath = originalpath*"_ver"*string(counter)*".jld2"
+        
+    end
+
+    println("To load, use:")
+    println("load(\""*fullpath*"\")")
+end
+
+
+
+# df = DataFrame()
+# df[!,"country"] = ["us", "us"]
+# df[!,"gwp"] = [102, 211]
+
+
+# checkpoint(df)
+
+# df_load = load("E://dev//CarbonMines//src//checkpoints//checkpoint_2023_08_19_ver2.jld2")

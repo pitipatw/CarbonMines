@@ -1,0 +1,155 @@
+using PlotlyJS
+
+#Experimant
+using PlotlyJS, DataFrames, CSV, Dates
+function linescatter1()
+    trace1 = scatter(;x=1:4, y=[10, 15, 13, 17], mode="markers")
+    trace2 = scatter(;x=2:5, y=[16, 5, 11, 9], mode="lines")
+    trace3 = scatter(;x=1:4, y=[12, 9, 15, 12], mode="lines+markers")
+    plot([trace1, trace2, trace3])
+end
+linescatter1()
+
+function linescatter2()
+    trace1 = scatter(;x=1:5, y=[1, 6, 3, 6, 1],
+                      mode="markers", name="Team A",
+                      text=["A-1", "A-2", "A-3", "A-4", "A-5"],
+                      marker_size=12)
+
+    trace2 = scatter(;x=1:5+0.5, y=[4, 1, 7, 1, 4],
+                      mode="markers", name= "Team B",
+                      text=["B-a", "B-b", "B-c", "B-d", "B-e"])
+    # setting marker.size this way is _equivalent_ to what we did for trace1
+    trace2["marker"] = Dict(:size => 12)
+
+    data = [trace1, trace2]
+    layout = Layout(;title="Data Labels Hover", xaxis_range=[0.75, 5.25],
+                     yaxis_range=[0, 8])
+    plot(data, layout)
+end
+linescatter2()
+
+
+
+
+
+#load the file,
+df_ready = DataFrame(CSV.File("csv_files\\df_ready.csv"))
+
+fc′ = df_ready[!,"fc_prime_MPa"]
+gwp = df_ready[!,"gwp_values"]
+id = df_ready[!,"id"] #should be category -> id
+#Plot the data using PlotlyJS
+function plotall()
+    #Global
+    trace1 = scatter(;x=fc′, y=gwp,
+                      mode="markers", name="Global",
+                      text=id,
+                      marker_size=12)
+    #EU
+    trace2 = scatter(;x=1:5+0.5, y=[4, 1, 7, 1, 4],
+                      mode="markers", name= "Team B",
+                      text=["B-a", "B-b", "B-c", "B-d", "B-e"])
+    # setting marker.size this way is _equivalent_ to what we did for trace1
+    trace2["marker"] = Dict(:size => 12)
+
+    data = [trace1, trace2]
+    layout = Layout(;title="Data Labels Hover", xaxis_range=[0.75, 5.25],
+                     yaxis_range=[0, 8])
+
+                     button_layer_1_height = 1.08
+layout = Layout(
+    width=800,
+    height=800,
+    autosize=false,
+    margin=attr(t=100,b=0,l=0,r=0),
+    scene=attr(
+        aspectratio=attr(x=1,y=1,z=0.7),
+        aspectmode="manual"
+    ),
+    updatemenus=[
+        attr(
+            buttons=[
+                attr(
+                    args=["colorscale", "Viridis"],
+                    label="Viridis",
+                    method="restyle"
+                ),
+                attr(
+                    args=["colorscale", "Cividis"],
+                    label="Cividis",
+                    method="restyle"
+                ),
+                attr(
+                    args=["colorscale", "Blues"],
+                    label="Blues",
+                    method="restyle"
+                ),
+                attr(
+                    args=["colorscale", "Greens"],
+                    label="Greens",
+                    method="restyle"
+                ),
+            ],
+            direction="down",
+            pad_r=10,
+            pad_t=10,
+            showactive=true,
+            x=0.1,
+            xanchor="left",
+            y=button_layer_1_height,
+            yanchor="top"
+        ),
+        attr(
+            buttons=[
+                attr(
+                    args=["reversescale", false],
+                    label="False",
+                    method="restyle"
+                ),
+                attr(
+                    args=["reversescale", true],
+                    label="True",
+                    method="restyle"
+                )
+            ],
+            direction="down",
+            pad_r= 10,
+            pad_t=10,
+            showactive=true,
+            x=0.37,
+            xanchor="left",
+            y=button_layer_1_height,
+            yanchor="top"
+        ),
+        attr(
+            buttons=[
+                attr(
+                    args=[attr(contours_showlines=false, type="contour")],
+                    label="Hide lines",
+                    method="restyle"
+                ),
+                attr(
+                    args=[attr(contours_showlines=true, type="contour")],
+                    label="Show lines",
+                    method="restyle"
+                ),
+            ],
+            direction="down",
+            pad=attr(r=10, t=10),
+            showactive=true,
+            x=0.58,
+            xanchor="left",
+            y=button_layer_1_height,
+            yanchor="top"
+        )
+    ]
+)
+    plot(data, layout)
+end
+plotall()
+
+#When hovering on the point, get that point id, or some unique name
+
+#["category"]["id"] should be unique
+#From that unique name, get everything from it out in the side plot (Makie?)
