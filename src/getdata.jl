@@ -57,7 +57,7 @@ function scrapeit(;all::Bool=false, total_pages::Int64=5, path = "rawdata/")
     l = Threads.SpinLock()
 
     Threads.@threads for page = 1:total_pages
-        sleep(5)
+        # sleep(5)
             # if page == 1 & total_pages != 10 #first run
             #     total_pages = parse(Int64, (res["X-Total-Pages"]))
             #     println("Scraping process started")
