@@ -16,7 +16,6 @@ println("TO DO
 Test files with the same name, after a couple of months, if they are the same, we can ignore running it\n 
 and only run the new one.")
 
-
 include("key.jl")
 
 function get_data(cate::String, page::Int64
@@ -58,6 +57,7 @@ function scrapeit(;all::Bool=false, total_pages::Int64=5, path = "rawdata/")
     l = Threads.SpinLock()
 
     Threads.@threads for page = 1:total_pages
+        sleep(5)
             # if page == 1 & total_pages != 10 #first run
             #     total_pages = parse(Int64, (res["X-Total-Pages"]))
             #     println("Scraping process started")
@@ -102,7 +102,7 @@ end
 
 #test run to get the total number of pages first
 res = get_data("materials", 1)
-n = Dict(res.headers)["X-Total-Count"]
+@show n::Int64 = parse(Int64,Dict(res.headers)["X-Total-Count"])
 fullpath = joinpath(@__DIR__, "rawdata_$n/")
 println("Current fullpath: $fullpath")
 try
@@ -113,6 +113,9 @@ catch
 end
 response_text = String(res.body)
 msg = JSON.parse(response_text)
+println("Start scraping")
+scrapeit(all=true, total_pages = n , path = fullpath)
+# scrapeit()
 # df = DataFrame(msg)
 ##########
 # 06 Aug 
