@@ -5,7 +5,9 @@ include("loadall.jl");
 # scrapeit(all=true, path =fullpath)
 
 #test merge files
-fullpath = "/Users/pitipatwongsittikan/dev/CarbonMines/src/rawdata_150802/"
+# fullpath = "/Users/pitipatwongsittikan/dev/CarbonMines/src/rawdata_150802/"
+fullpath = "//Users//pitipatwongsittikan//dev//CarbonMines//src//rawdata_129710//"
+
 df = mergefiles(dummy = true, path = fullpath)  #If this line fails due to keys error, remove those keys (if those aren't the important ones)
 
 if typeof(df) == DataFrame
@@ -242,7 +244,7 @@ df_single[!,"long"] = long;
 
 
 
-filename = "df_single.csv"
+filename = "0404_df_single.csv"
 CSV.write(filename, df_single) ;#174 columns
 checkpoint(df_single)
 println("CSV file created at $filename")

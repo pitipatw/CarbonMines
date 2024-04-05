@@ -12,7 +12,7 @@ println("also, should try DataFrameMeta.jl !!")
     Go through rawdata folder and concat all the files into a dataframe
     #tidy up files in the rawdata folder and merge into a dataframe
 """
-function mergefiles(;dummy = false, path = "rawdata/")
+function mergefiles(;dummy = false, path = "rawdata//")
     #get path to rawdata folder
     filepath = joinpath(@__DIR__,path)
     
