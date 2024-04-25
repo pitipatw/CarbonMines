@@ -33,3 +33,5 @@ src/checkpoints/
 *.json
 
 *.jld2
+
+src/.DS_Store
