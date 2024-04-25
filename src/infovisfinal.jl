@@ -14,22 +14,39 @@ countries = unique(df1[!, :Entity])
 skipcountries = ["Asia", "Asia (excl. China and India)", "Europe", "Europe (excl. EU-27)", "Europe (excl. EU-28)", "European Union (27)", "European Union (28)", "High-income countries", "Low-income countries", "Lower-middle-income countries", "North America", "North America (excl. USA)", "Upper-middle-income countries"]
 nskip = length(skipcountries)
 skipcheck = skipcountries
+
 f1 = Figure( size = (2000,1000))
 ax1 = Axis(f1[1,1], title = "History of CO2 emission around the world", xlabel = "Year", ylabel = "Annual CO2 emission from cement",)
-ax2 = Axis(f1[1,2], title = "History of CO2 emission around the world", xlabel = "Year", ylabel = "Annual CO2 emission from cement",yscale = log10, limits =(nothing, nothing, 1, 1e10))
-for ci in eachindex(countries)
-    country = countries[ci] 
-    if country ∈ skipcountries 
-        nskip -= 1
-        continue
-    end
+ax2 = Axis(f1[1,2], title = "History of CO2 emission around the world [Old days]", xlabel = "Year", ylabel = "Annual CO2 emission from cement", limits =(nothing, nothing, 0, 1e5))
+ax3 = Axis(f1[2,1], title = "History of CO2 emission around the world [Old days2]", xlabel = "Year", ylabel = "Annual CO2 emission from cement", limits =(1950, 2000, 0, 1e7))
+ax4 = Axis(f1[2,2], title = "History of CO2 emission around the world [Old days3]", xlabel = "Year", ylabel = "Annual CO2 emission from cement", limits =(nothing, nothing, 0, 1e6))
 
-    df1_country = df1[ df1.Entity .== countries[ci], :]
-    lines!(ax1, df1_country.Year, 1 .+ df1_country[!,"Annual CO2 emissions from cement"], label = countries[ci])
-    lines!(ax2, df1_country.Year, 1 .+ df1_country[!,"Annual CO2 emissions from cement"], label = countries[ci])
+codes = unique(df1.Code)
+df1 = df1[ .!ismissing.(df1.Code), :]
+for ci in eachindex(codes)
+    country = codes[ci]
+    @show country
+    if !ismissing(country) 
+        if country ∈ skipcountries 
+            nskip -= 1
+            continue
+        end
+        # @show country
+        df1_country = df1[ df1.Code .== country, :]
+        lines!(ax1, df1_country.Year, df1_country[!,"Annual CO2 emissions from cement"], label = countries[ci])
+        if maximum(df1_country[!,"Annual CO2 emissions from cement"]) < 1e5
+        lines!(ax2, df1_country.Year, df1_country[!,"Annual CO2 emissions from cement"], label = countries[ci])
+        end
+        if maximum(df1_country[!,"Annual CO2 emissions from cement"]) < 1e7
+        lines!(ax3, df1_country.Year, df1_country[!,"Annual CO2 emissions from cement"], label = countries[ci])
+        end
+        if maximum(df1_country[!,"Annual CO2 emissions from cement"]) < 1e6
+            lines!(ax4, df1_country.Year, df1_country[!,"Annual CO2 emissions from cement"], label = countries[ci])
+            end
+    end
 end
 
-Legend(f1[2,1], ax1, orientation = :horizontal, tellwidth = false, tellheight = true, nbanks = 5)
+# Legend(f1[2,1], ax1, orientation = :horizontal, tellwidth = false, tellheight = true, nbanks = 5)
 # Legend(f1[2,2], ax2)
 
 
@@ -73,7 +90,7 @@ df3 = CSV.read("C://Users//pitipatw//Dropbox (MIT)//dev//CarbonMines//Dataset 3 
 df3[!,:zip] = df3[!, "Plant Location - Zip"]
 usstatelines = JSON.parsefile("src//us-states.json")
 usstatelines = GeoJSON.read("src//us-states.json")
-
+using ZipCode
 long = Vector{Float64}()
 lat = Vector{Float64}()
 notfound = Vector{Int64}()
@@ -99,7 +116,7 @@ end
 df3[!, :long] = long
 df3[!, :lat] = lat
 
-
+df_dummy = DataFrame(:long => long, :lat => lat)
 df3[!,"A1-A3 Global Warming Potential (kg CO2-eq)"] = collect(df3[!,"A1-A3 Global Warming Potential (kg CO2-eq)"])
 df3[!, "Concrete Compressive Strength (MPa)"] = collect(df3[!, "Concrete Compressive Strength (MPa)"])
 
