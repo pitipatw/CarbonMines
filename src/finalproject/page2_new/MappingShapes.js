@@ -46,7 +46,9 @@ function setup() {
   // Once the map has finished loading, the mapReady() function will be called.
   worldMap = new SimpleSVG(mapPath, mapX, mapY, mapWidth, mapHeight, mapReady);
   stateCarbon = loadJSON(stateCarbonPath, dataLoaded)
+}
 
+function setupControls(){
   mySelect = createSelect();
   mySelect.position(width-150, height-100);
   mySelect.option("States");
@@ -69,8 +71,6 @@ function setup() {
   myCheckbox2.position(width-100,height/2-50)
   myCheckbox3.position(width-100,height/2-100)
 
-
-
 }
 
 
@@ -86,7 +86,10 @@ function mapReady() {
   // handle mouseover (hover) events, and mouseout (the opposite of hover)
   worldMap.onMouseOver(mapOver);
   worldMap.onMouseOut(mapOut);
+
+  setupControls()
 }
+ 
 
 function dataLoaded(data){
   sessions = data; 
@@ -142,9 +145,13 @@ function mapClick(shape) {
       }
   allStates = worldMap.listShapes()
   print(marked)
+  // first, 
   for (let i = 1; i < allStates.length ; i++){
     if (marked.includes(allStates[i])) {
       print("Orange")
+      // thisState = worldMap.allStateShapes.keys(allStates[i])
+      // print(thisState)
+      worldMap.setFill(allStates[i], 'Orange');
       //HERE, find a way to loop through other shapes in the list, not sure where to get that
     }
     }

@@ -50,6 +50,9 @@ function SimpleSVG(path, x, y, w, h, loadCallback) {
     return Object.keys(children);
   };
   
+  // this.allStateShapes = function(){ 
+  //   return Object
+  // }
   
   function setAttributeRecursive(shape, attr, what) {
     if (shape.hasAttribute(attr)) {  // don't introduce new attrs where not needed
