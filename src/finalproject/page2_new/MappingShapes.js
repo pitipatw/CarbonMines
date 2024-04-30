@@ -11,7 +11,8 @@ let carboni;
 let minCarbon = 10000;
 let maxCarbon = 0;
 
-let loaded = false ;
+// let loaded = false ;
+let loaded = true;
 let availableStates = [];
 
 
@@ -31,7 +32,7 @@ function setup() {
   let mapHeight = height * 0.8;
   // Center the map on the screen. The mapX and mapY
   // coordinates are relative to the sketch location.
-  let mapX = (width - mapWidth) / 2;
+  let mapX = (width - mapWidth) / 5;
   let mapY = (height - mapHeight) / 2;
 
   // let mapPath = "data/world-robinson.svg";
@@ -226,6 +227,7 @@ function draw() {
   // showClickedStates(clickedStates)
   // background(255)
   if (!loaded){
+    background(255)
     textAlign(CENTER,CENTER);
     text("Loading "+ frameCount, width-100, height-10)
   }
@@ -236,6 +238,14 @@ function draw() {
     text(maxCarbon, width/2+100, height-30)
     text(mySlider.value(), width/2-50, height-30)
     colorMapByCarbon(mySlider.value())
+    push()
+    fill(0)
+    let amount = mySlider.value()
+    let ratio = 100.00
+    text("If we restricted the carbon emission to "+amount + " kgCO2e..." , 50,50)
+    text(ratio +"% of the states would not pass" , 300,75)
+
+    pop()
 
     // if (myCheckbox1.checked()) {
     //   background(255);
