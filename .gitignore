@@ -33,3 +33,5 @@ src/checkpoints/
 *.jld2
 
 src/.DS_Store
+
+src/rawdata_150802/
