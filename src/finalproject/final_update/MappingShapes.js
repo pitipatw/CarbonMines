@@ -21,8 +21,7 @@ let availableStates = [];
 let mySelect;
 let mySlider;
 
-let carbonSlideVal = 0 ; 
-
+let carbonSlideVal = 0;
 
 let higherState = [];
 let lowerState = [];
@@ -30,25 +29,32 @@ let lowerState = [];
 let higherCarbon = [];
 let lowerCarbon = [];
 
+// let col = color(255,255,255) ; 
+let statesColor = []; //should be a dictionary of the state names
+
+
+
+
 // map value to color gradients in the range of 0 to 1. 
-function myColor(value){
-if (value <= 0){ //less than the selected state -> blue tone
-  let to = color(255,0,0)
-}
-else{
-  let to = color(218, 165, 32)
+function myColor(value) {
+  if (value <= 0) { //less than the selected state -> blue tone
+    let to = color(255, 0, 0)
   }
-baseColor = color(255,255,255)
-col = lerbColor(baseColor, to, abs(value))
-return col
+  else {
+    let to = color(218, 165, 32)
+  }
+  baseColor = color(255, 255, 255)
+  col = lerbColor(baseColor, to, abs(value))
+  return col
 }
-
-
-
 
 function setup() {
   createCanvas(800, 480);
-  background(224);
+  background(200);
+
+  let defaultColor = "grey"; 
+  let clickedColor = color(255,255,255) //when you select it, it turns white.
+  let hoverColor = color(200,200,200) //When you hover it, a darker shade of white (grey?)
 
   // If you change the dimensions, the aspect ratio will stay the same.
   // The browser will size the map to use as much of the width/height as possible.
@@ -65,7 +71,6 @@ function setup() {
   let mapPath = "data/us-states.svg";
   let stateCarbonPath = "data/statecarbon.json"
 
-
   // This will create a new SVG map from the 'robinson.svg' file in the data folder.
   // Once the map has finished loading, the mapReady() function will be called.
   worldMap = new SimpleSVG(mapPath, mapX, mapY, mapWidth, mapHeight, mapReady);
@@ -74,7 +79,7 @@ function setup() {
 }
 
 
-
+//Set up the controls buttons on the screen.
 function setupControls() {
   mySelect = createSelect();
   mySelect.position(width - 285, height - 50);
@@ -85,21 +90,12 @@ function setupControls() {
   mySelect.style('padding', '0.5em');
 
   mySlider = createSlider(0, 700);
-  mySlider.position(width / 2 - 200, height - 30)
-  mySlider.size(300)
+  mySlider.position(width / 2 - 200, height - 30);
+  mySlider.size(300);
 
-  myResetButton = createButton("RESET")
-  myResetButton.position(width - 75, height - 40)
-  myResetButton.mousePressed(reset)
-
-  // myCheckbox1 = createCheckbox("Office");
-  // myCheckbox2 = createCheckbox("Warehouse");
-  // myCheckbox3 = createCheckbox("Residential");
-
-  // myCheckbox1.position(width-100,height/2)
-  // myCheckbox2.position(width-100,height/2-50)
-  // myCheckbox3.position(width-100,height/2-100)
-
+  myResetButton = createButton("RESET");
+  myResetButton.position(width - 75, height - 40);
+  myResetButton.mousePressed(reset);
 }
 
 // this function is called when the map loads
@@ -121,6 +117,10 @@ function mapReady() {
 
 //Load the data from the json file.
 function dataLoaded(data) {
+  let defaultColor = "grey"; 
+  let clickedColor = color(255,255,255) //when you select it, it turns white.
+  let hoverColor = color(200,200,200) //When you hover it, a darker shade of white (grey?)
+
   sessions = data;
   for (let i = 1; i < sessions.length; i++) {
     availableStates.push(sessions[i].State)
@@ -133,8 +133,8 @@ function dataLoaded(data) {
     if (thisCarbon < minCarbon) {
       minCarbon = thisCarbon
     }
-    // print(sessions[i].State)
-    worldMap.setFill(sessions[i].State, 'green');
+    //put the available states into the default color.
+    worldMap.setFill(sessions[i].State, defaultColor);
   }
   loaded = true
 }
@@ -143,101 +143,131 @@ function reset() {
   //when hit, turn every state to grey color, and clickedstate to ""
   for (let i = 1; i < sessions.length; i++) {
     state = sessions[i].State
-    worldMap.setFill(sessions[i].State, 'green');
-    clickedStateShape = ""
-    clickedState = ""
-    marked = []
+    worldMap.setFill(sessions[i].State, defaultColor);
   }
+  //reset all of the arrays and variables.
+  clickedStateShape = "";
+  clickedState = "";
+  higherStates = [];
+  lowerStates = [];
+
+  higherStatesCarbon = [];
+  lowerStatesCarbon = [];
 }
 
 //Define what happen when click on the map.
 function mapClick(shape) {
+  let defaultColor = "grey"; 
+  let clickedColor = color(255,255,255) //when you select it, it turns white.
+  let hoverColor = color(200,200,200) //When you hover it, a darker shade of white (grey?)
+
   //First, make sure that the element that clicked is not ignoorange.
   if (!ignoreShape(shape.id)) {
-    // worldMap.setFill(shape, 'orange');
-    //prevent error from the first run
+
+    //###THESE LINES can be commented, since we will always colors them over anyway, we dont have to put them back to default.
+    //prevent error from the first run, that is, you have to reset the old ones to the default color.
     oldClickedStateShape = clickedStateShape
 
     //reset the color to normal (only 1 state can be clicked at a time)
     if (availableStates.includes(oldClickedStateShape.id)) {
-      worldMap.setFill(oldClickedStateShape, 'green');
+      worldMap.setFill(oldClickedStateShape, defaultColor);
     }
+    //Until HERE
 
+    //Now, we change the clicked color into the color that we want.
     if (availableStates.includes(shape.id)) {
       clickedStateShape = shape
-      worldMap.setFill(clickedStateShape, 'orange');
+      worldMap.setFill(clickedStateShape, clickedColor);
     }
 
     //compare carbon and highlight
     currentCarbon = carbon[availableStates.indexOf(clickedStateShape.id)]
 
-    higherState = [];
-    lowerState = [];
+    //reset values
+    higherStates = [];
+    lowerStates = [];
 
-    higherCarbon = [];
-    lowerCarbon = [];
+    higherStatesCarbon = [];
+    lowerStatesCarbon = [];
 
     //loop one by one, if larger, push it to the right array with carbon.
-    for (let i = 1; i < sessions.length; i++) {
-      carboni = carbon[i]
-      statei = sessions[i].State
-      col = myColor(val)
-      if (carboni >= currentCarbon) {
-        if (statei != clickedStateShape.id) {
-          marked.push(availableStates[i])
-          // worldMap.setFill(availableStates[i], 'red');
-          let val = carboni/currentCarbon
-          
-          worldMap.setFill(availableStates[i], 'red');
+    for (let i = 0; i < sessions.length; i++) {
+      statei = sessions.State[i]
+      if (statei != clickedStateShape.id) {
 
+        carboni = carbon[i]
+        statei = sessions[i].State
+        statesColor = [] ; 
+
+        if (carboni >= currentCarbon) {
+          higherStates.push(availableStates[i])
+          higherStatesCarbon.push(carboni)
+          // worldMap.setFill(availableStates[i], 'red');
+          let val = (carboni - currentCarbon) / (maxCarbon - currentCarbon)
+          col = myColor(val)
+          worldMap.setFill(availableStates[i], col);
+          
         }
-        else{
-          print(availableStates[i])
-          worldMap.setFill(availableStates[i], 'green')
+        else {
+          lowerStates.push(availableStates[i])
+          lowerStatesCarbon.push(carboni)
+          // worldMap.setFill(availableStates[i], 'red');
+          let val = (carboni - currentCarbon) / (currentCarbon - minCarbon)
+          col = myColor(val)
+          worldMap.setFill(availableStates[i], col);
+          
         }
+        statesColor.push(col); 
       }
 
     }
-    allStates = worldMap.listShapes()
+    // allStates = worldMap.listShapes()
   }
-
   //also update the table.
-  
   print(`click ${shape.id}`);
 }
 
 function mapOver(shape) {
+  let defaultColor = "grey"; 
+  let clickedColor = color(255,255,255) //when you select it, it turns white.
+  let hoverColor = color(200,200,200) //When you hover it, a darker shade of white (grey?)
+
   //Make sure that it's not ignoorange.
   if (!ignoreShape(shape.id)) {
-    //if it's the clickable state, put it in orange
+    //if it's the clickable state, put it in white?
     if (availableStates.includes(shape.id)) {
-      worldMap.setFill(shape, 'orange')
+      worldMap.setFill(shape, hoverColor)
     }
     //if it's the currently clicked, put it in darker orange.
-    if (clickedStateShape.id == shape.id) {
-      //dark read
-      worldMap.setFill(shape, '#8B0000')
-    }
+    // if (clickedStateShape.id == shape.id) {
+    //   //dark read
+    //   worldMap.setFill(shape, '#8B0000')
+    // }
     print(`over ${shape.id}`);
   }
 }
 
 function mapOut(shape) {
+  let defaultColor = "grey"; 
+  let clickedColor = color(255,255,255) //when you select it, it turns white.
+  let hoverColor = color(200,200,200) //When you hover it, a darker shade of white (grey?)
+
   //Make sure that it's not ignoorange.
   if (!ignoreShape(shape.id)) {
-    //If it's the clicked state, put it in orange
-    if (shape.id == clickedState){ 
-      worldMap.setFill(shape, 'orange');
+    //If it's the clicked state, put it in it's clicked color, which is white.
+    if (shape.id == clickedState) {
+      worldMap.setFill(shape, clickedColor);
     }
-    if (shape.id != clickedState){
+    else {
+      //now, the others has to turn back to the previous color.
       if (availableStates.includes(shape.id)) {
-      worldMap.setFill(shape, 'green')
+        worldMap.setFill(shape, statesColor[availableStates.indexOf(shape.id)])
       }
     }
     //It it's the marked state, put it in red
-    if (marked.includes(shape.id)){
-      worldMap.setFill(shape, 'red');
-    }
+    // if (marked.includes(shape.id)) {
+    //   worldMap.setFill(shape, 'red');
+    // }
   }
   print(`out ${shape.id}`);
 }
@@ -261,11 +291,11 @@ function tableStats(name) {
   let boxHeight = 75;
   let rowHeight = 20;
   let rowWidth = boxWidth;
-  let ranki = "No data" ; //query the rank
-  let carboni = "No data" ; //query the carbon
+  let ranki = "No data"; //query the rank
+  let carboni = "No data"; //query the carbon
 
-  if (availableStates.includes(name)){
-    ranki = marked.length
+  if (availableStates.includes(name)) {
+    ranki = higherStatesCarbon.length
     carboni = str(carbon[availableStates.indexOf(name)])
   }
 
@@ -276,12 +306,12 @@ function tableStats(name) {
   text(name, boxStartX + 50, boxStartY + 0.75 * rowHeight)
 
   text("Rank: " + ranki, boxStartX + 10, boxStartY + 0.75 * 3 * rowHeight)
-  text("Carbon: " + carboni.substring(0,5), boxStartX + 10, boxStartY + 0.75 * 4 * rowHeight)
+  text("Carbon: " + carboni.substring(0, 5), boxStartX + 10, boxStartY + 0.75 * 4 * rowHeight)
 
   pop()
 }
 
-function updateCarbonbySlider(currentCarbon){
+function updateCarbonbySlider(currentCarbon) {
   //go through each states
   sliderMarked = []
   for (let i = 1; i < sessions.length; i++) {
@@ -291,12 +321,12 @@ function updateCarbonbySlider(currentCarbon){
       sliderMarked.push(availableStates[i])
       // worldMap.setFill(availableStates[i], 'purple');
     }
-    else{
+    else {
       // print(availableStates[i])
       // worldMap.setFill(availableStates[i], 'yellow')
     }
   }
-  ratio = str(sliderMarked.length/sessions.length*100).substring(0,5)
+  ratio = str(sliderMarked.length / sessions.length * 100).substring(0, 5)
 }
 
 
@@ -314,12 +344,12 @@ function draw() {
     background(255)
     text("DONE", width - 100, height - 10)
 
-//     ("Check by States");
-// "Check Nation-wide");
-    if (mySelect.value() == "Check by States"){
+    //     ("Check by States");
+    // "Check Nation-wide");
+    if (mySelect.value() == "Check by States") {
 
     }
-    else if (mySelect.value() == "Check Nation-wide"){
+    else if (mySelect.value() == "Check Nation-wide") {
 
       text(minCarbon, width / 2 - 200, height - 30)
       text(maxCarbon, width / 2 + 100, height - 30)
@@ -337,13 +367,13 @@ function draw() {
 
 
     tableStats(clickedStateShape.id)
-    
+
     //if the value changes, update the plot 
-    if (carbonSlideVal != mySlider.value()){
-        carbonSlideVal = mySlider.value()
-        updateCarbonbySlider(carbonSlideVal)
+    if (carbonSlideVal != mySlider.value()) {
+      carbonSlideVal = mySlider.value()
+      updateCarbonbySlider(carbonSlideVal)
     }
-  
+
 
     if (infoPopupState) {
       infoPopup()
