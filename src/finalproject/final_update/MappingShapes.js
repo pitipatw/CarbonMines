@@ -24,7 +24,28 @@ let mySlider;
 let carbonSlideVal = 0 ; 
 
 
-let marked = [];
+let higherState = [];
+let lowerState = [];
+
+let higherCarbon = [];
+let lowerCarbon = [];
+
+// map value to color gradients in the range of 0 to 1. 
+function myColor(value){
+if (value <= 0){ //less than the selected state -> blue tone
+  let to = color(255,0,0)
+}
+else{
+  let to = color(218, 165, 32)
+  }
+baseColor = color(255,255,255)
+col = lerbColor(baseColor, to, abs(value))
+return col
+}
+
+
+
+
 function setup() {
   createCanvas(800, 480);
   background(224);
@@ -149,15 +170,26 @@ function mapClick(shape) {
 
     //compare carbon and highlight
     currentCarbon = carbon[availableStates.indexOf(clickedStateShape.id)]
-    marked = []
-    //loop one by one, if larger, mark it 
+
+    higherState = [];
+    lowerState = [];
+
+    higherCarbon = [];
+    lowerCarbon = [];
+
+    //loop one by one, if larger, push it to the right array with carbon.
     for (let i = 1; i < sessions.length; i++) {
       carboni = carbon[i]
       statei = sessions[i].State
+      col = myColor(val)
       if (carboni >= currentCarbon) {
         if (statei != clickedStateShape.id) {
           marked.push(availableStates[i])
+          // worldMap.setFill(availableStates[i], 'red');
+          let val = carboni/currentCarbon
+          
           worldMap.setFill(availableStates[i], 'red');
+
         }
         else{
           print(availableStates[i])
