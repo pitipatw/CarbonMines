@@ -350,7 +350,7 @@ function tableStats(name,boxStartX, boxStartY) {
   }
   // find 4 other states that have close co2 
   //c1 c2 c3 c4 
-  dictCarbonState.sort((a,b) => a.Carbon - b.carbon) ; 
+  dictCarbonState.sort((a,b) => a.Carbon - b.Carbon) ; 
   // print(dictCarbonState)
   // get the first 4 and display them 
 
@@ -363,11 +363,13 @@ function tableStats(name,boxStartX, boxStartY) {
 
   text("Rank: " + ranki, boxStartX + 10, boxStartY + 0.75 * 3 * rowHeight)
   text("Carbon: " + carboni.substring(0, 5), boxStartX + 10, boxStartY + 0.75 * 4 * rowHeight)
+  if (dictCarbonState.length > 1) {
+    text("Top 4 closest states", boxStartX+10, boxStartY + 75)
   for (let i = 0 ;i<= 4; i++){ 
-    print(i)
-    print(dictCarbonState[i].State)
-    // text(dictCarbonState[i].State , boxStartX, boxStartY + i*10)
+
+    text(stateAbbreviations[dictCarbonState[i].State] , boxStartX + 10, boxStartY + 85+ i*10)
   }
+}
   pop()
 }
 
@@ -440,7 +442,7 @@ function draw() {
       rect(width/2 - size/2,height/2 - size/2,size,size)
       fill(255)
       lineheight = 12
-      startx = width/2 - size/2 + 300
+      startx = width/2 - size/2
       starty = 15
       text("The built environment contributes substantial carbon emissions through concrete construction.", startx, starty)
       text("which accounts for 11% of total greenhouse gas emission.",startx, starty + lineheight)
