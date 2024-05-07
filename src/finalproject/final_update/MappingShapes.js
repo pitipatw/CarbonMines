@@ -64,7 +64,6 @@ function setup() {
   createCanvas(800, 480);
   background(200);
 
-
   // If you change the dimensions, the aspect ratio will stay the same.
   // The browser will size the map to use as much of the width/height as possible.
   let mapWidth = width * 0.75;  // use 80% of the sketch size
@@ -93,13 +92,6 @@ function setup() {
 
 //Set up the controls buttons on the screen.
 function setupControls() {
-  // mySelect = createSelect();
-  // mySelect.position(width - 285, height - 50);
-  // mySelect.option("Check Nation-wide");
-  // mySelect.option("Check by States");
-  // mySelect.style('border-radius', '3px');
-  // mySelect.style('width', '150px');
-  // mySelect.style('padding', '0.5em');
 
   mySlider = createSlider(0, 700);
   mySlider.position(width / 2 - 200, height - 30);
@@ -425,7 +417,7 @@ function draw() {
         ratioText = ratio.substring(0, 5)  + "% of the states would not pass."
       }
       text(ratioText, 300, 50)
-      text("Hello", width / 2, height / 2)
+      // text("Hello", width / 2, height / 2)
       pop()
       currentSlideValue = mySlider.value()
       tableStats("NA", 20,300)
