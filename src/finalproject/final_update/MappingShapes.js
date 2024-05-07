@@ -41,8 +41,9 @@ let defaultColor = "grey";
 let clickedColor = "white" //when you select it, it turns white.
 let hoverColor = "white" //When you hover it, a darker shade of white (grey?)
 let outColor = "white"
-
+//Text related variables
 let ratioText = "";
+
 // map value to color gradients in the range of 0 to 1. 
 function myColor(value) {
   let to
