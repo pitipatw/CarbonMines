@@ -1,38 +1,39 @@
+//SVG related variables
 let worldMap;
 
+//Data related variables
+let sessions = []; 
+let availableStates = [];
+let loaded = false ;
+
+//Popup screen state
 let infoPopupState = true;
 
+//Click-related variables
 let clickedStateShape = "";
-let oldClickedStateShape = "";
-// let clickedStateId = ""; 
-let carbon = [];
 let currentColor = [];
 
+//Carbon related variables
+let carbon = [];
 let carboni;
 let minCarbon = 10000;
 let maxCarbon = 0;
-let sessions = []; 
-let loaded = false ;
-// let loaded = true;
-let singleMode = true;
-let currentSlideValue = 0; 
-
-let availableStates = [];
-let val; 
-
-// let mySelect;
-let mySlider;
-
-let carbonSlideVal = 0;
-
 let higherStates = [];
 let lowerStates = [];
-
+let val; //relative carbon value
 let higherStatesCarbon = [];
 let lowerStatesCarbon = [];
 let dictCarbonState = []; 
 
-// let col = color(255,255,255) ; 
+//Mode 
+let singleMode = true;
+
+//Slider related variables
+let mySlider;
+let currentSlideValue = 0; 
+let carbonSlideVal = 0;
+
+//Color setup
 let statesColor = []; //should be a dictionary of the state names
 let defaultColor = "grey";
 // let clickedColor = "color(255,255,255)" //when you select it, it turns white.
