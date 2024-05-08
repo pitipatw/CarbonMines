@@ -6,6 +6,7 @@ let stateAbbreviations = {
   "CA": "California",
   "CO": "Colorado",
   "CT": "Connecticut",
+  "DC": "Washington, D.C.",
   "DE": "Delaware",
   "FL": "Florida",
   "GA": "Georgia",

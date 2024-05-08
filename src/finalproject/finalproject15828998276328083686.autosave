@@ -1,0 +1,36 @@
+// we can check this flag to see if the data is loaded
+let loaded = false;
+
+// this will hold the data
+let sessions;
+
+
+// New!
+// since we will drawing the timeline many times, we can save
+// some calculation by setting the x positions just once
+let sessionX;
+
+// New!
+// we will always have one entry in the timeline selected
+let selectedIndex = 0;
+
+
+// we can plug these into the map() function
+// to plot the timeline
+let minDate;
+let maxDate;
+
+let leftEdge;
+let rightEdge;
+
+
+function setup() {
+  createCanvas(1280, 720);
+
+  leftEdge = 100;
+  rightEdge = width - 100;
+
+  // see the dataLoaded function below for what we do with the data
+  loadJSON("sessions.json", dataLoaded);
+  fill(255);
+}
