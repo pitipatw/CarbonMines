@@ -198,7 +198,12 @@ function dataLoaded(data) {
     //put the available states into the default color.
     worldMap.setFill(sessions[i].State, defaultColor);
   }
+  standardDev = stddev(carbon)
+  maxCarbon = mean(carbon) + 2*standardDev
+  // minCarbon = mean(carbon) - 2*standardDev
   loaded = true
+  setupControls()
+
   // print(carbon)
 }
 
