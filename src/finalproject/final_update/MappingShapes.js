@@ -72,6 +72,7 @@ function setup() {
   // myCanvas.parent('canvasContainer'); // This places the canvas in a specific HTML element
   // myCanvas.id('myCanvas'); // Assigns an ID to the canvas
   background(200);
+  textFont("Garamond")
 
   // If you change the dimensions, the aspect ratio will stay the same.
   // The browser will size the map to use as much of the width/height as possible.
@@ -143,7 +144,7 @@ function setupControls() {
   mySlider = createSlider(40, 120);
   mySlider.position(width / 2 - 200, height - 30);
   mySlider.size(300);
-  mySlider.value(400)
+  mySlider.value(0)
 
   mySelect = createSelect()
   mySelect.position(40, 380)
@@ -445,7 +446,7 @@ function tableStats(name, boxStartX, boxStartY, singleMode) {
     text("Carbon: " + carboni, boxStartX + 10, boxStartY + 0.6 * 4 * rowHeight)
   }
   else {
-    text("Carbon: " + carboni.substring(0, 5) + " unit", boxStartX + 10, boxStartY + 0.6 * 4 * rowHeight)
+    text("Carbon: " + carboni.substring(0, 5) + " units", boxStartX + 10, boxStartY + 0.6 * 4 * rowHeight)
   }
   if (dictCarbonState.length > 1) {
     push()
@@ -477,7 +478,7 @@ function tableStats(name, boxStartX, boxStartY, singleMode) {
       let selectedFood = mySelect.value()
       let numberOfFood = round(18 * carboni / eq[selectedFood])
       // text(selectedFood, boxStartX + 10, endPoint + 35)
-      text('The embodied carbon of an average US house (18 sq.m) would be equivalent to ' + selectedFood + " " + str(numberOfFood).substring(0, 5) + " times.", boxStartX + 5, endPoint + 25, boxWidth - 2.5, boxHeight)
+      text('The embodied carbon of an average US house in this state (18 sq.m) would be equivalent to ' + selectedFood + " " + str(numberOfFood).substring(0, 5) + " times.", boxStartX + 5, endPoint + 25, boxWidth - 2.5, boxHeight)
 
     }
     else { //empty table.
@@ -512,7 +513,10 @@ function draw() {
     tint(255, 101)
     image(BG, 0, 0, width, height);
     pop()
-    text("DONE", width - 100, height - 10)
+    push()
+    textSize(10)
+    text("DONE", width, height - 10)
+    pop()
     push()
     fill(0)
     text("Min:", width / 2 - 320, height - 30)
@@ -531,13 +535,14 @@ function draw() {
     push()
     if (singleMode) { //clickMode
       mySelect.show()
-      text("Single State Mode", 10, 10)
+      // text("Single State Mode", 10, 10)
       tableStats(clickedStateShape.id, 40, 100, singleMode)
       fill(150)
       push()
       fill(0)
       text("Please select an activity", 40, 375)
       pop()
+      getGraph(clickedStateShape)
     }
     else { //sliderMode
       fill(0)
@@ -551,7 +556,7 @@ function draw() {
         updateCarbonbySlider(carbonSlideVal)
       }
       updateCarbonbySlider(mySlider.value())
-
+      getGraphMulti(mySlider.value())
     }
     textSize(20)
     let amount = 0
@@ -572,6 +577,8 @@ function draw() {
     text(ratioText, 350, 65)
     pop()
     pop()
+
+
   }
 
 }
@@ -587,6 +594,64 @@ function mousePressed() {
   }
 }
 
+function getGraph(name) { 
+  let graphX = 50
+  let graphY = 350
+  let graphWidth = 100
+  push()
+  fill(0)
+  for (let i = 0; i < availableStates.length ; i++) {
+    //place years
+    // text(table.getString(i, 0), i * 30 + 60, 420);
+    //pull numbers
+    carboni= carbon[i]
+    if (name.id == availableStates[i]) { 
+      fill(200)
+    }
+    else{
+      fill(0)
+
+    }
+    //draw graph
+    rect(i * graphWidth/carbon.length + graphX, graphY - carboni, graphWidth/carbon.length, carboni)
+  }
+   //determine highest value
+  //  maxValue=max(budgetValues);
+  // for (var k=0;k<maxValue;k=k+50){
+  //   text(k,10,420-k);
+  // }
+  pop()
+}
+
+function getGraphMulti(value) { 
+  let graphX = 50
+  let graphY = 350
+  let graphWidth = 100
+  push()
+  fill(0)
+  for (let i = 0; i < availableStates.length ; i++) {
+    //place years
+    // text(table.getString(i, 0), i * 30 + 60, 420);
+    //pull numbers
+    carboni= carbon[i]
+    if (carboni < value) { 
+      fill(200)
+    }
+    else{
+      fill(0)
+
+    }
+    //draw graph
+    rect(i * graphWidth/carbon.length + graphX, graphY - carboni, graphWidth/carbon.length, carboni)
+  }
+   //determine highest value
+  //  maxValue=max(budgetValues);
+  // for (var k=0;k<maxValue;k=k+50){
+  //   text(k,10,420-k);
+  // }
+  pop()
+}
+
 // function showIntro(){
 //   infoPopupState = true
 //   print("Clicked Info")
@@ -596,3 +661,10 @@ function mousePressed() {
 //   let rect2 = select('#myRectangle2');
 //   rect2.style('display', 'block');
 // }
+
+// move the sliders to the top or near the text, 
+// keep the bars 
+// compare with other countries
+
+// move the equivalent goes to the bottom. Long paragraph 
+// Sort the bars, turn off the stroke
