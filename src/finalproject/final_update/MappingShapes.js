@@ -253,9 +253,11 @@ function mapClick(shape) {
           // worldMap.setFill(availableStates[i], 'red');
           if (maxCarbon == clickedCarbon) {
             val = 1
+
           }
           else {
             val = (carboni - clickedCarbon) / (maxCarbon - clickedCarbon)
+
             // print("Higher",val)
           }
         }
@@ -264,9 +266,11 @@ function mapClick(shape) {
           lowerStatesCarbon.push(carboni)
           if (minCarbon == clickedCarbon) {
             val = -1
+            
           }
           else {
             val = (carboni - clickedCarbon) / (clickedCarbon - minCarbon)
+            
             // print(carboni, clickedCarbon)
             // print("lower",val, carboni, clickedCarbon, minCarbon)
           }
@@ -367,6 +371,7 @@ function updateCarbonbySlider(carbonValue) {
       }
       else {
         val = (carboni - carbonValue) / (maxCarbon - carbonValue)
+        val = 1
         // print("Higher",val)
       }
     }
@@ -375,9 +380,11 @@ function updateCarbonbySlider(carbonValue) {
       lowerStatesCarbon.push(carboni)
       if (minCarbon == carbonValue) {
         val = -1
+
       }
       else {
         val = (carboni - carbonValue) / (carbonValue - minCarbon)
+        val = -1 
         // print(carboni, clickedCarbon)
         // print("lower",val, carboni, clickedCarbon, minCarbon)
       }
